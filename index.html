@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#1e2d44">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="Smarter With AI R4">
+    <meta name="apple-mobile-web-app-title" content="Smarter With AI R5">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -518,6 +518,111 @@
         }
         .quick-action-card:hover { transform: translateY(-3px); border-color: rgba(146,180,59,.55); box-shadow: 0 14px 28px rgba(30,45,68,.12); }
         .dark .quick-action-card { background: #1e2d44; border-color: rgba(146,180,59,.18); }
+        .home-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .85rem;
+        }
+        .home-info-card {
+            display: flex;
+            align-items: flex-start;
+            gap: .9rem;
+            min-width: 0;
+            padding: 1rem;
+            border-radius: 1rem;
+            background: #fff;
+            border: 1px solid rgba(30,45,68,.10);
+            box-shadow: 0 9px 24px rgba(30,45,68,.07);
+        }
+        .dark .home-info-card { background: #1e2d44; border-color: rgba(146,180,59,.18); }
+        .home-info-icon {
+            width: 2.8rem;
+            height: 2.8rem;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            border-radius: .85rem;
+            background: rgba(146,180,59,.14);
+            color: var(--accent-green);
+        }
+        .install-guide {
+            overflow: hidden;
+            border-radius: 1rem;
+            border: 1px solid rgba(146,180,59,.32);
+            background: linear-gradient(135deg, rgba(146,180,59,.08), rgba(255,255,255,.96));
+            box-shadow: 0 10px 28px rgba(30,45,68,.07);
+        }
+        .dark .install-guide { background: linear-gradient(135deg, rgba(146,180,59,.10), #1e2d44); }
+        .install-guide summary {
+            display: flex;
+            align-items: center;
+            gap: .85rem;
+            padding: 1rem 1.1rem;
+            cursor: pointer;
+            list-style: none;
+            color: var(--accent-navy);
+            font-weight: 800;
+        }
+        .dark .install-guide summary { color: #fff; }
+        .install-guide summary::-webkit-details-marker { display: none; }
+        .install-guide summary .install-chevron { transition: transform .2s ease; }
+        .install-guide[open] summary .install-chevron { transform: rotate(180deg); }
+        .install-steps {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: .75rem;
+            padding: 0 1rem 1rem;
+        }
+        .install-step {
+            padding: .9rem;
+            border-radius: .85rem;
+            background: rgba(255,255,255,.78);
+            border: 1px solid rgba(30,45,68,.09);
+        }
+        .dark .install-step { background: rgba(10,20,33,.42); border-color: rgba(255,255,255,.09); }
+        .install-step-list {
+            display: grid;
+            gap: .7rem;
+            margin-top: .75rem;
+            padding: 0;
+            list-style: none;
+            counter-reset: install-counter;
+        }
+        .install-step-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: .65rem;
+            color: #374151;
+            font-size: .9rem;
+            line-height: 1.75;
+            counter-increment: install-counter;
+        }
+        .dark .install-step-list li { color: #e5e7eb; }
+        .install-step-list li::before {
+            content: counter(install-counter);
+            width: 1.65rem;
+            height: 1.65rem;
+            display: grid;
+            place-items: center;
+            flex: 0 0 1.65rem;
+            margin-top: .05rem;
+            border-radius: 999px;
+            background: var(--accent-green);
+            color: #fff;
+            font-size: .78rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+        .community-home-card {
+            background: linear-gradient(135deg, var(--accent-navy), #17263a);
+            color: #fff;
+            border: 1px solid rgba(146,180,59,.38);
+            border-radius: 1rem;
+            box-shadow: 0 16px 38px rgba(30,45,68,.18);
+        }
+        @media (max-width: 720px) {
+            .home-info-grid, .install-steps { grid-template-columns: 1fr; }
+        }
         .onboarding-overlay {
             position: fixed;
             inset: 0;
@@ -1143,7 +1248,23 @@
             const wrapperRef = useRef(null);
 
             useEffect(() => {
-                if (wrapperRef.current && window.lucide) {
+                if (!wrapperRef.current) return;
+
+                if (name === 'youtube') {
+                    wrapperRef.current.innerHTML = `
+                        <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4L15.8 12l-6.2 3.6Z"/>
+                        </svg>`;
+                    const svg = wrapperRef.current.querySelector('svg');
+                    if (svg && className) {
+                        className.split(' ').forEach(cls => {
+                            if (cls) svg.classList.add(cls);
+                        });
+                    }
+                    return;
+                }
+
+                if (window.lucide) {
                     const i = document.createElement('i');
                     i.setAttribute('data-lucide', name);
                     
@@ -1336,9 +1457,12 @@
         const FORCE_LEARNING_MODE = "live";
         const COURSE_WEEK_COUNT = 9;
         const APP_STORAGE_NAMESPACE = "round5-live";
+        const OFFICIAL_COHORT_START_DATE = "2026-07-24";
+        const ROUND5_WHATSAPP_COMMUNITY_URL = "https://chat.whatsapp.com/GctNSmIMdmb0gl9HtN2J5R";
+        const ROUND5_YOUTUBE_PLAYLIST_URL = "https://www.youtube.com/playlist?list=PLH4txBm0bmYg";
         const APP_EDITION_DESCRIPTION = "نسخة الدفعة الخامسة المباشرة. محاضراتك وتاسكاتك ومساحتك بيتحدثوا معاك أسبوعًا بعد أسبوع.";
-        const APP_DATE_LABEL = "تاريخ بداية رحلتك مع الدفعة الخامسة";
-        const APP_DATE_HELPER = "بنستخدم التاريخ عشان نفتح لك الأسبوع المناسب ونحدّث رحلتك تلقائيًا.";
+        const APP_DATE_LABEL = "بداية الدفعة الخامسة";
+        const APP_DATE_HELPER = "الجمعة 24 يوليو 2026 — التطبيق بيفتح لك الأسبوع المناسب تلقائيًا حسب جدول الدفعة.";
         const APP_PROFILE_MODE_LABEL = "الدفعة الخامسة";
         const TASK_SHARE_BATCH_LABEL = "الدفعة الخامسة من دبلومة Smarter With AI";
         const APP_HOME_EYEBROW = "أهلًا بيك في الدفعة الخامسة… رحلتك الأذكى بدأت";
@@ -1357,9 +1481,8 @@
         };
         const getStudentWord = (profile, male, female, neutral = male) => profile?.gender === 'female' ? female : profile?.gender === 'male' ? male : neutral;
         const getCurrentWeekIndex = (profile) => {
-            if (!profile) return 0;
             if (APP_MODE !== 'live') return COURSE_WEEK_COUNT - 1;
-            const start = parseDateSafe(profile.startDate);
+            const start = parseDateSafe(OFFICIAL_COHORT_START_DATE);
             const now = new Date();
             const diffDays = Math.max(0, Math.floor((now - start) / 86400000));
             return Math.min(COURSE_WEEK_COUNT - 1, Math.floor(diffDays / 7));
@@ -1453,7 +1576,7 @@
                 profession: '',
                 gender: 'male',
                 learningMode: FORCE_LEARNING_MODE,
-                startDate: getTodayIso(),
+                startDate: OFFICIAL_COHORT_START_DATE,
                 learningGoal: '',
                 goalAudioId: null,
                 goalAudioMimeType: '',
@@ -1473,7 +1596,7 @@
                     learningMode: FORCE_LEARNING_MODE,
                     firstName,
                     learningGoal,
-                    startDate: form.startDate || getTodayIso(),
+                    startDate: OFFICIAL_COHORT_START_DATE,
                     version: APP_DATA_VERSION,
                     updatedAt: new Date().toISOString()
                 };
@@ -1536,7 +1659,9 @@
 
                         <div>
                             <label className="font-bold text-[--accent-navy] dark:text-white block mb-2">{APP_DATE_LABEL}</label>
-                            <input type="date" className="app-field" value={form.startDate} onChange={e => setForm({ ...form, startDate: e.target.value })} />
+                            <div className="choice-card active cursor-default">
+                                <strong className="flex items-center gap-2 text-[--accent-navy] dark:text-white"><Icon name="calendar-days" className="w-5 h-5 text-[--accent-green]" /> الجمعة 24 يوليو 2026</strong>
+                            </div>
                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">{APP_DATE_HELPER}</p>
                         </div>
 
@@ -1618,7 +1743,7 @@
             const removeCheckin = async item => { await deleteAudioBlob(item.audioId); setCheckins(prev => prev.filter(row => row.id !== item.id)); };
             const goalPayload = () => ({
                 kind: 'هدفي من الدبلومة', title: 'الهدف اللي بدأت بيه', content: profile.learningGoal || 'لسه ما كتبتش هدفك.',
-                week: 'بداية الرحلة', lecture: APP_EDITION_NAME, date: formatArabicDate(profile.startDate)
+                week: 'بداية الرحلة', lecture: APP_EDITION_NAME, date: formatArabicDate(OFFICIAL_COHORT_START_DATE)
             });
             const checkinPayload = item => ({
                 kind: 'تطور في رحلتي', title: item.title || 'تحديث على هدفي', content: item.text || (item.audioId ? 'تسجيل صوتي محفوظ داخل التطبيق.' : ''),
@@ -1736,7 +1861,7 @@
             const totalDone = progress.lectureDone + progress.taskDone;
             const totalItems = progress.lectureTotal + progress.taskTotal;
             const overall = totalItems ? Math.round((totalDone / totalItems) * 100) : 0;
-            const daysSinceStart = Math.max(1, Math.floor((new Date() - parseDateSafe(profile.startDate)) / 86400000) + 1);
+            const daysSinceStart = Math.max(1, Math.floor((new Date() - parseDateSafe(OFFICIAL_COHORT_START_DATE)) / 86400000) + 1);
             const journeyEyebrow = APP_HOME_EYEBROW || `اليوم رقم ${daysSinceStart} في رحلتك`;
             return (
                 <div className="space-y-6">
@@ -1763,7 +1888,7 @@
                             <div className="p-3 rounded-xl bg-[--accent-navy] text-white w-fit"><Icon name={week.icon || 'brain-circuit'} className="w-8 h-8" /></div>
                             <div className="flex-grow">
                                 <p className="text-sm font-bold text-[--accent-green] mb-1">{APP_STATION_LABEL} · الأسبوع {recommendedWeekIndex + 1}</p>
-                                <h3 className="text-xl sm:text-2xl font-bold text-[--accent-navy] dark:text-white mb-2">{week.title.replace(/^الأسبوع\s*\d+\s*:\s*/, '')}</h3>
+                                <h3 className="text-xl sm:text-2xl font-bold text-[--accent-navy] dark:text-white mb-2">{week.title.replace(/^الأسبوع\s+(?:\d+|الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع)\s*:\s*/, '')}</h3>
                                 <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{week.summary || 'محتوى عملي يساعدك تنقل استخدامك للذكاء الاصطناعي لمستوى أفضل.'}</p>
                             </div>
                             <div className="flex flex-col sm:flex-row lg:flex-col gap-2 min-w-[190px]">
@@ -1788,7 +1913,79 @@
 
                     <section className="content-card p-5 rounded-xl shadow-md"><div className="flex flex-col sm:flex-row sm:items-center gap-4"><div className="goal-icon"><Icon name="target" className="w-6 h-6" /></div><div className="flex-grow"><p className="text-xs font-bold text-[--accent-green] mb-1">بوصلتك في الرحلة</p><h3 className="font-bold text-xl text-[--accent-navy] dark:text-white">هدفك من الدبلومة</h3><p className="text-sm text-gray-600 dark:text-gray-300 mt-1 line-clamp-2">{profile.learningGoal || 'أضف هدفك عشان تتابع تطورك.'}</p></div><button type="button" onClick={() => onNavigate('notes')} className="btn-brand-navy px-4 py-2.5 rounded-lg font-bold inline-flex items-center justify-center gap-2"><Icon name="layout-dashboard" className="w-4 h-4" /> افتح مساحتي</button></div></section>
 
-                    <Reminder>{APP_HOME_REMINDER}</Reminder>
+                    <section className="space-y-3">
+                        <div>
+                            <h3 className="text-2xl font-bold text-[--accent-navy] dark:text-white">معلومات مهمة للدفعة</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">المواعيد، التسجيلات، المجتمع، وطريقة حفظ التطبيق.</p>
+                        </div>
+
+                        <div className="home-info-grid">
+                            <div className="home-info-card">
+                                <div className="home-info-icon"><Icon name="calendar-days" className="w-6 h-6" /></div>
+                                <div className="min-w-0">
+                                    <strong className="block text-[--accent-navy] dark:text-white text-lg">مواعيد المحاضرات</strong>
+                                    <p className="text-gray-700 dark:text-gray-200 mt-1 font-semibold">الثلاثاء والجمعة · الساعة 10 مساءً</p>
+                                    <span className="text-sm text-gray-500 dark:text-gray-400">البداية: الجمعة 24 يوليو 2026 · مباشر على Google Meet</span>
+                                </div>
+                            </div>
+                            <div className="home-info-card">
+                                <div className="home-info-icon"><Icon name="youtube" className="w-6 h-6" /></div>
+                                <div className="min-w-0">
+                                    <strong className="block text-[--accent-navy] dark:text-white text-lg">المحاضرات مسجلة على يوتيوب</strong>
+                                    <p className="text-gray-700 dark:text-gray-200 mt-1">تقدر تسمع المحاضرة من التطبيق أو من يوتيوب. لو سمعتها على يوتيوب هتلاقيها في سجل المشاهدات (History) عندك.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <a href={ROUND5_WHATSAPP_COMMUNITY_URL} target="_blank" rel="noopener noreferrer" className="community-home-card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4 transition-transform hover:-translate-y-0.5">
+                            <div className="w-12 h-12 rounded-xl bg-[--accent-green] text-white grid place-items-center flex-shrink-0"><Icon name="message-circle" className="w-7 h-7" /></div>
+                            <div className="flex-grow">
+                                <strong className="block text-xl">مجتمع الدفعة الخامسة على واتساب</strong>
+                                <span className="block text-sm text-white/75 mt-1">جوه المجتمع 3 جروبات؛ اتأكد إنك دخلت فيهم كلهم عشان توصلك كل التحديثات.</span>
+                            </div>
+                            <span className="bg-[--accent-green] text-white px-5 py-2.5 rounded-lg font-bold inline-flex items-center justify-center gap-2 flex-shrink-0">انضم للمجتمع <Icon name="external-link" className="w-4 h-4" /></span>
+                        </a>
+
+                        <details className="install-guide">
+                            <summary>
+                                <span className="home-info-icon"><Icon name="bookmark" className="w-6 h-6" /></span>
+                                <span className="flex-grow">
+                                    <strong className="block">إزاي تحفظ التطبيق على موبايلك أو اللاب؟</strong>
+                                    <small className="block text-gray-500 dark:text-gray-300 font-normal mt-1">احفظه علشان تقدر تفتحه بسهولة في أي وقت</small>
+                                </span>
+                                <Icon name="chevron-down" className="install-chevron w-5 h-5 text-[--accent-green] flex-shrink-0" />
+                            </summary>
+                            <div className="install-steps">
+                                <div className="install-step">
+                                    <div className="flex items-center gap-2 mb-2"><Icon name="smartphone" className="w-5 h-5 text-[--accent-green]" /><strong className="text-[--accent-navy] dark:text-white">Android</strong></div>
+                                    <ol className="install-step-list">
+                                        <li>افتح التطبيق في متصفح Chrome.</li>
+                                        <li>اضغط على التلت نقاط (⋮) الموجودة فوق.</li>
+                                        <li>اختار «إضافة إلى الشاشة الرئيسية» أو «تثبيت التطبيق».</li>
+                                        <li>سمّيه «دبلومة Smarter With AI» أو أي اسم تحبه، ثم اضغط «إضافة» أو «حفظ».</li>
+                                    </ol>
+                                </div>
+                                <div className="install-step">
+                                    <div className="flex items-center gap-2 mb-2"><Icon name="smartphone" className="w-5 h-5 text-[--accent-green]" /><strong className="text-[--accent-navy] dark:text-white">iPhone / iPad</strong></div>
+                                    <ol className="install-step-list">
+                                        <li>افتح التطبيق في متصفح Safari.</li>
+                                        <li>اضغط على زر المشاركة الموجود تحت.</li>
+                                        <li>اختار «إضافة إلى الشاشة الرئيسية».</li>
+                                        <li>سمّيه «دبلومة Smarter With AI» أو أي اسم تحبه، ثم اضغط «إضافة».</li>
+                                    </ol>
+                                </div>
+                                <div className="install-step">
+                                    <div className="flex items-center gap-2 mb-2"><Icon name="laptop" className="w-5 h-5 text-[--accent-green]" /><strong className="text-[--accent-navy] dark:text-white">اللاب أو الكمبيوتر</strong></div>
+                                    <ol className="install-step-list">
+                                        <li>افتح التطبيق في متصفح Chrome.</li>
+                                        <li>اضغط على علامة النجمة (☆) الموجودة فوق جنب عنوان الموقع.</li>
+                                        <li>اكتب «دبلومة Smarter With AI» أو أي اسم تحبه.</li>
+                                        <li>اضغط «تم» علشان يتحفظ في الإشارات المرجعية (Bookmarks).</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </details>
+                    </section>
                 </div>
             );
         };
@@ -1831,103 +2028,87 @@
         // لكل محاضرة يمكن إضافة: summary + attachments[]، وكل مرفق يحتوي title/url/description.
         // النظام يدعم أي عدد من المحاضرات داخل الأسبوع بدون تعديل الواجهة.
         const lecturesData = [
-            { 
-                title: "الأسبوع 1: مقدمة لعالم الذكاء الاصطناعي",
-                summary: "تفهم الذكاء الاصطناعي ببساطة، تعرف حدوده وإمكانياته، وتبدأ تستخدمه كمساعد يفهم هدفك بدل ما تسأله أسئلة عامة.",
-                icon: "brain-circuit", 
+            {
+                title: "الأسبوع الأول: البداية وبناء فريقك الذكي",
+                summary: "الأسبوع ده هيساعدك تفهم إمكانيات النماذج اللغوية وإزاي تتواصل صح معاها، كمان هتتعلم إزاي تبني أول مساعد شخصي ليك.",
+                icon: "brain-circuit",
                 lectures: [
-                    { id: "lecture-01", title: "المحاضرة الأولى", youtubeId: "9xRdGEjt0lw", youtubeUrl: "https://youtu.be/9xRdGEjt0lw?si=xclx5szhXvVfEZo6", sourceType: "youtube" }
-                ], 
-                guides: [
-                    { title: "شرح الأسبوع الأول", url: "https://mahmoudtaru.github.io/Smarter-With-Ai-Round-4-Week-1/" }
-                ] 
+                    { id: "lecture-01", title: "المحاضرة 1: البداية الصح", summary: "هنتعرف مع بعض على نظام الدبلومة، وبعدها هنبدأ نتكلم عن النماذج اللغوية: إيه إمكانياتها وإزاي نتواصل معاها صح عشان نطلع بأفضل نتيجة." },
+                    { id: "lecture-02", title: "المحاضرة 2: ابنِ أول موظف ذكي", summary: "هتتعلم إزاي تبني أول مساعد شخصي ليك يساعدك في مهمة بتعملها باستمرار، وإزاي تختبره وتطوره لحد ما يشتغل بالطريقة اللي تناسبك." }
+                ]
             },
-            { 
-                title: "الأسبوع 2: البحث والتعلم بشكل أذكي",
-                summary: "تتعلم تبحث وتفهم وتلخص مصادر طويلة، وتبني مساحة تعلم ذكية تساعدك تذاكر أو تتعلم أي موضوع بشكل أسرع.",
-                icon: "search", 
+            {
+                title: "الأسبوع الثاني: التعلم والبحث الذكي",
+                summary: "الأسبوع ده هتتعلم إزاي تستخدم الذكاء الاصطناعي في التعلم والبحث، وتوصل لمعلومات موثوقة، وتتابع الموضوعات اللي تهمك بسهولة.",
+                icon: "search",
                 lectures: [
-                    { id: "lecture-02", title: "المحاضرة الثانية", youtubeId: "DEwBYS0_r2I", youtubeUrl: "https://youtu.be/DEwBYS0_r2I?si=S2xibsuXjwI3dx2B", sourceType: "youtube" },
-                    { id: "lecture-02-live", title: "لايف المحاضرة الثانية", youtubeId: "r2mQKkkOpqY", youtubeUrl: "https://youtu.be/r2mQKkkOpqY?si=MfMUNQcksHYOPfFe", sourceType: "youtube" }
-                ], 
-                guides: [
-                    { title: "شرح المحاضرة الثانية", url: "https://mahmoudtaru.github.io/Smarter-With-Ai-Round-4-Week-2/" },
-                    { title: "شرح لايف المحاضرة الثانية", url: "https://mahmoudtaru.github.io/Smarter-Learning-with-Aii/" }
-                ] 
+                    { id: "lecture-03", title: "المحاضرة 3: التعلم ومساحات تعلمك الذكية", summary: "هنتعلم إزاي نخلي الذكاء الاصطناعي يساعدنا في الشرح والتلخيص والمراجعة، وإزاي نبني مساحة تعلم خاصة بينا على NotebookLM من ملفاتنا ومصادرنا." },
+                    { id: "lecture-04", title: "المحاضرة 4: البحث والمهام المجدولة", summary: "هتتعلم تختار نوع البحث المناسب، توصل لمصادر موثوقة وتتأكد منها، وكمان تعمل مهمة تتابع ليك الأخبار أو الأبحاث أو الفرص اللي تهمك." }
+                ]
             },
-            { 
-                title: "الأسبوع 3: العروض التقديمية والتصميم البصري",
-                summary: "تحول الأفكار والمعلومات لعروض وإنفوجرافيك منظمين، وتطلع نتيجة احترافية من غير ما تقضي ساعات في التنسيق.",
-                icon: "presentation", 
+            {
+                title: "الأسبوع الثالث: المحتوى والتواصل البصري",
+                summary: "الأسبوع ده هتتعلم تحوّل أفكارك لمحتوى وعروض تقديمية، وتعمل صور وإنفوجرافيك يوصلوا فكرتك بشكل واضح وجذاب.",
+                icon: "presentation",
                 lectures: [
-                    { id: "lecture-03", title: "المحاضرة الثالثة", youtubeId: "1I3gwehzi4E", youtubeUrl: "https://youtu.be/1I3gwehzi4E?si=b0UY92Qe-af_k3pC", sourceType: "youtube" }
-                ], 
-                guides: [
-                    { title: "شرح الأسبوع الثالث", url: "https://mahmoudtaru.github.io/Smarter-With-Ai-Round-4-weak-3/" }
-                ] 
+                    { id: "lecture-05", title: "المحاضرة 5: كتابة المحتوى والعروض التقديمية", summary: "هتتعلم إزاي تكتب محتوى مناسب لهدفك وجمهورك، سواء بوست أو مقال أو إيميل أو سكريبت، وإزاي تحوّل فكرتك لعرض تقديمي احترافي." },
+                    { id: "lecture-06", title: "المحاضرة 6: توليد الصور والإنفوجرافيك", summary: "هنتعلم إزاي نعمل صور من وصف بسيط، ونعدّل صور موجودة، ونستخدم المراجع عشان نوصل للشكل اللي في دماغنا، ونحوّل المعلومات لإنفوجرافيك واضح." }
+                ]
             },
-            { 
-                title: "الأسبوع 4: صناعة وتعديل الصور",
-                summary: "تنشئ صورًا تخدم فكرتك، تعدلها باحتراف، وتدمج أدوات الذكاء الاصطناعي مع Canva في Workflow عملي.",
-                icon: "image", 
+            {
+                title: "الأسبوع الرابع: كانفا والتطبيق المتكامل",
+                summary: "الأسبوع ده هتتعلم تستخدم Canva عشان تحوّل شغلك لتصميمات جاهزة للنشر، وبعدها تجمع اللي اتعلمته في خطوات واضحة تخدم هدفًا حقيقيًا عندك.",
+                icon: "palette",
                 lectures: [
-                    { id: "lecture-04", title: "المحاضرة الرابعة", youtubeId: "MX4zbwiRBVo", youtubeUrl: "https://youtu.be/MX4zbwiRBVo?si=Jir9AMiLtu_u8wBm", sourceType: "youtube" }
-                ], 
-                guides: [
-                    { title: "شرح الأسبوع الرابع", url: "https://mahmoudtaru.github.io/Smarter-With-Ai-Round-4-week-4/" }
-                ] 
+                    { id: "lecture-07", title: "المحاضرة 7: Canva والذكاء الاصطناعي", summary: "هنتعلم إزاي نستخدم Canva في تصميم العروض والكاروسيل والإنفوجرافيك، ونعدّل الصور ونغيّر المقاسات ونجهز تصميمات قابلة للنشر." },
+                    { id: "lecture-08", title: "المحاضرة 8: المراجعة الأولى — ابنِ مسارك كاملًا", summary: "هنراجع كل اللي اتعلمناه، وبعدها هترتب الأدوات والمساعدين والخطوات مع بعض في مسار واضح، وتجربه على حاجة حقيقية عندك." }
+                ]
             },
-            { 
-                title: "الأسبوع 5: صناعة الفيديوهات والتحريك",
-                summary: "تنقل فكرتك من سكريبت لمشاهد وصور وفيديو، وتحافظ على ثبات الشخصية واتجاه بصري واضح.",
-                icon: "clapperboard", 
+            {
+                title: "الأسبوع الخامس: البناء الرقمي والوكلاء",
+                summary: "الأسبوع ده هتتعلم تبني موقع أو أداة بسيطة من غير ما تكون مبرمج، وكمان تتعرف على الوكلاء اللي يقدروا يساعدوك في تنفيذ مهام على الإنترنت.",
+                icon: "code-2",
                 lectures: [
-                    { id: "lecture-05", title: "المحاضرة الخامسة", youtubeId: "_wTZ0hfyrYM", youtubeUrl: "https://youtu.be/_wTZ0hfyrYM?si=hTFVWw8Y0IAbgnF9", sourceType: "youtube" }
-                ], 
-                guides: [
-                    { title: "شرح المحاضرة", url: "https://mahmoudtaru.github.io/Smarter-With-Ai-Round-4-Week-5/" }
-                ] 
+                    { id: "lecture-09", title: "المحاضرة 9: بناء المواقع والألعاب والأدوات", summary: "هتتعلم إزاي تحوّل فكرتك لوصف واضح، وتبني منه موقع أو لعبة أو أداة بسيطة، وبعدها تعدّلها وتحسّن شكلها وتجربتها على الموبايل." },
+                    { id: "lecture-10", title: "المحاضرة 10: وكلاء الذكاء الاصطناعي والمتصفح الوكيل", summary: "هنتعرف ببساطة على الوكلاء، وإزاي يقدروا يساعدوك في البحث والرد على الإيميلات وتنفيذ مهام فيها أكتر من خطوة داخل المواقع." }
+                ]
             },
-            { 
-                title: "الأسبوع 6: السحر الصوتي والمزامنة",
-                summary: "تولّد أصواتًا طبيعية، تضبط النطق والمشاعر، وتستخدم الدبلجة والمزامنة والأفاتار بطريقة عملية.",
-                icon: "audio-lines", 
+            {
+                title: "الأسبوع السادس: صناعة الفيديو",
+                summary: "الأسبوع ده هتتعلم تحوّل فكرتك لفيديو كامل، بداية من كتابة الفكرة وتقسيمها لمشاهد، لحد تجميع الفيديو وتجهيزه للنشر.",
+                icon: "clapperboard",
                 lectures: [
-                    { id: "lecture-06", title: "المحاضرة السادسة", youtubeId: "JdL9oDSXnOs", youtubeUrl: "https://youtu.be/JdL9oDSXnOs?si=LLFeEDh0UhlQpPHE", sourceType: "youtube", summary: "السحر الصوتي والمزامنة بالذكاء الاصطناعي." }
-                ], 
-                guides: [
-                    { title: "شرح المحاضرة السادسة", url: "https://mahmoudtaru.github.io/Smarter-With-Ai-Round-4-week-6/" }
-                ] 
+                    { id: "lecture-11", title: "المحاضرة 11: من الفكرة إلى مشاهد", summary: "هتتعلم إزاي تكتب فكرة الفيديو وتقسمها لمشاهد، وتحوّل النصوص أو الصور لمقاطع فيديو مع التحكم في الحركة والكاميرا." },
+                    { id: "lecture-12", title: "المحاضرة 12: تطبيقات الفيديو والمونتاج", summary: "هنتعلم إزاي نجمع المشاهد في فيديو متماسك، ونضيف المونتاج والترجمة، ونحسّن الجودة لحد ما يبقى الفيديو جاهز للنشر." }
+                ]
             },
-            { 
-                title: "الأسبوع 7: صناعة المساعدين الشخصيين (Custom GPTs / Gems)",
-                summary: "تبني مساعدًا متخصصًا يفهم شغلك وملفاتك وطريقتك، ويوفر عليك تكرار نفس التعليمات كل مرة.",
-                icon: "bot", 
+            {
+                title: "الأسبوع السابع: الصوت والشخصية الرقمية",
+                summary: "الأسبوع ده هتتعلم تعمل تعليقًا صوتيًا احترافيًا، وتستخدم الصوت مع شخصية رقمية عشان تنتج فيديو شرح أو محتوى جاهز.",
+                icon: "audio-lines",
                 lectures: [
-                    { id: "lecture-07", title: "المحاضرة السابعة", youtubeId: "I26dPygWscI", youtubeUrl: "https://youtu.be/I26dPygWscI?si=uOpPRUPWWo_ateOv", sourceType: "youtube", summary: "صناعة المساعدين الشخصيين المتخصصين." }
-                ], 
-                guides: [
-                    { title: "شرح المحاضرة السابعة", url: "https://mahmoudtaru.github.io/Smarter-With-Ai-Round-4-Week-7/" }
-                ] 
+                    { id: "lecture-13", title: "المحاضرة 13: إنشاء الصوت واستنساخه وتعديله", summary: "هتتعلم إزاي تحوّل النص لصوت، وتحسّن التسجيلات أو تغيّر الصوت، وتتحكم في النبرة والسرعة والمشاعر عشان يطلع الأداء طبيعيًا." },
+                    { id: "lecture-14", title: "المحاضرة 14: الأفاتار المتكلم", summary: "هنتعلم إزاي نعمل شخصية رقمية تتكلم بالصوت اللي اخترناه، ونستخدمها في فيديوهات الشرح أو المحتوى بأكتر من لغة ومقاس." }
+                ]
             },
-            { 
-                title: "الأسبوع 8: البرمجة والتطبيقات (Vibe Coding)",
-                summary: "تحول أفكارك لمواقع وأدوات وتطبيقات بسيطة حتى لو مش مبرمج، وتتعلم تطور النتيجة خطوة بخطوة.",
-                icon: "code-2", 
+            {
+                title: "الأسبوع الثامن: تجميع الرحلة ومشروع التخرج",
+                summary: "الأسبوع ده هتجمع كل اللي عملته خلال الدبلومة، ترتبه وتطوره، وتحوّله لمشروع تخرج يحكي رحلتك ويعرض شغلك ونتائجك.",
+                icon: "route",
                 lectures: [
-                    { id: "lecture-08", title: "المحاضرة الثامنة", youtubeId: "glGvPY2SAmg", youtubeUrl: "https://youtu.be/glGvPY2SAmg?si=Cs5kkJ2xFWNKPt9J", sourceType: "youtube", summary: "البرمجة والتطبيقات بالذكاء الاصطناعي (Vibe Coding)." }
-                ], 
-                guides: [
-                    { title: "شرح الأسبوع الثامن", url: "https://mahmoudtaru.github.io/smarter-with-ai-round-4-week-8/" }
-                ] 
+                    { id: "lecture-15", title: "المحاضرة 15: المراجعة الكبرى وصناعة المسارات", summary: "هنراجع شغلك كله، ونطوّر المساعدين والمهارات اللي بنيتها، ونرتبهم داخل مسارات مفيدة فعلًا ليك في دراستك أو شغلك." },
+                    { id: "lecture-16", title: "المحاضرة 16: ورشة بناء مشروع التخرج", summary: "هنشتغل مع بعض على موقع مشروع التخرج، ونضيف فيه رحلتك ومساعديك ومهاراتك ومساراتك وأفضل النتائج اللي وصلت لها." }
+                ]
             },
-            { 
-                title: "الأسبوع 9: مشروع التخرج",
-                summary: "تجمع اللي اتعلمته في حالات استخدام حقيقية وWorkflow مفيد يثبت إن الذكاء الاصطناعي بقى جزءًا فعالًا من حياتك.",
-                icon: "award", 
-                projectDetails: graduationProjectDetails,
-                note: graduationProjectNote
-            },
+            {
+                title: "الأسبوع التاسع: عرض ومراجعة مشاريع التخرج",
+                summary: "الأسبوع ده هنراجع مشروعك ونظبطه، وبعدها هتعرض رحلتك والنتائج اللي وصلت لها، وتخرج بنسخة نهائية تقدر تشاركها مع أي حد.",
+                icon: "award",
+                lectures: [
+                    { id: "lecture-17", title: "المحاضرة 17: عيادة المشاريع", summary: "هنراجع المشاريع مع بعض، ونصلّح أي مشكلة في الموقع أو الروابط، ونحسّن طريقة عرض الشغل قبل التسليم النهائي." },
+                    { id: "lecture-18", title: "المحاضرة 18: العرض النهائي والتخرج", summary: "كل واحد هيعرض رحلته وأهم الحاجات اللي بناها والفرق اللي حصل معاه، وهياخد ملاحظات تساعده يكمّل بعد الدبلومة." }
+                ]
+            }
         ];
 
         const safeJsonParse = (value, fallback) => {
@@ -2528,8 +2709,13 @@
                             <div className="flex-grow">
                                 <h3 className="section-header text-xl font-bold mb-1">المحاضرات متاحة داخل الموقع</h3>
                                 <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed">
-                                    شغّل المحاضرة وسجّل ملاحظاتك واحفظها، وبعدها تقدر ترجع لها وتعدّلها أو تنسخ كل ملاحظة لوحدها.
+                                    شغّل المحاضرة وسجّل ملاحظاتك واحفظها، أو افتح قائمة تشغيل الدفعة على يوتيوب. أي محاضرة تسمعها هناك هتلاقيها في سجل المشاهدات (History) عندك.
                                 </p>
+                                <a href={ROUND5_YOUTUBE_PLAYLIST_URL} target="_blank" rel="noopener noreferrer" className="btn-brand-primary w-full sm:w-auto px-5 py-2.5 rounded-lg inline-flex items-center justify-center gap-2 text-sm font-bold mt-4">
+                                    <Icon name="youtube" className="w-5 h-5" />
+                                    <span>افتح قائمة تشغيل الدفعة الخامسة</span>
+                                    <Icon name="external-link" className="w-4 h-4" />
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -2639,7 +2825,7 @@
         // TasksTab Component Data
         // لربط تاسك بمحاضرة محددة أضف lectureId داخل كائن التاسك، مثال: { lectureId: "lecture-02", text: "..." }.
         // التاسكات غير المرتبطة بـ lectureId تظهر كتاسكات عامة للأسبوع.
-        const tasksData = [
+        const legacyTasksData = [
             { 
                 title: "تاسكات الأسبوع 1: مقدمة لعالم الذكاء الاصطناعي", 
                 deadline: "18 أبريل 2026", 
@@ -2844,7 +3030,211 @@
             },
         ];
 
-        const TASK_GUIDANCE_BY_WEEK = [
+        const tasksData = [
+            {
+                title: "تاسكات الأسبوع الأول: البداية وبناء فريقك الذكي",
+                deadline: "",
+                tasks: [
+                    {
+                        id: "task-lecture-01",
+                        lectureId: "lecture-01",
+                        required: true,
+                        text: "شاركنا محادثة تواصلت فيها مع الذكاء الاصطناعي باحترافية",
+                        brief: "اختار موقفًا حقيقيًا، اشرح السياق بوضوح، وحدد النتيجة اللي محتاجها، وبعد ما توصل لمخرج مناسب شارك رابط المحادثة.",
+                        ideas: ["اختار استخدامًا حقيقيًا من شغلك أو دراستك.", "وضّح السياق والهدف والشكل المطلوب للنتيجة.", "راجع الرد وكمل المحادثة لحد ما توصل للمخرج اللي محتاجه."]
+                    },
+                    {
+                        id: "task-lecture-02",
+                        lectureId: "lecture-02",
+                        required: true,
+                        text: "ابنِ أول مساعد شخصي «موظف» عندك",
+                        brief: "اختار مهمة بتتكرر معاك، وابنِ لها مساعدًا شخصيًا واضح الوظيفة، اختبره على حالة حقيقية، ثم شارك الرابط والنتيجة.",
+                        ideas: ["حدد وظيفة واحدة واضحة للمساعد.", "اكتب له التعليمات والسياق والمخرج المطلوب.", "اختبره بمثال حقيقي وعدّل تعليماته قبل المشاركة."]
+                    }
+                ],
+                note: "تاسكان إجباريان فقط: تاسك واحد بعد كل محاضرة."
+            },
+            {
+                title: "تاسكات الأسبوع الثاني: التعلم والبحث الذكي",
+                deadline: "",
+                tasks: [
+                    {
+                        id: "task-lecture-03",
+                        lectureId: "lecture-03",
+                        required: true,
+                        text: "ابنِ مساحة تعلم ذكية في NotebookLM",
+                        brief: "اختار موضوعًا تتعلمه فعلًا، أضف له مصادر مناسبة، ثم شارك مخرجًا واحدًا مفيدًا من مساحة التعلم.",
+                        ideas: ["استخدم كتابًا أو محاضرة أو فيديو أو ملفات موثوقة.", "نظّم المصادر داخل NotebookLM.", "شارك ملخصًا أو Quiz أو Flashcards أو Mind Map أو Audio Overview."]
+                    },
+                    {
+                        id: "task-lecture-04",
+                        lectureId: "lecture-04",
+                        required: true,
+                        text: "أنجز بحثًا موثقًا في موضوع يهمك",
+                        brief: "اختار سؤالًا حقيقيًا، ابحث عنه من مصادر موثوقة، وشارك النتيجة في صورة تقرير أو جدول أو مخرج عملي مناسب.",
+                        ideas: ["حدد سؤال البحث والمخرج المطلوب قبل البداية.", "راجع المصادر وتأكد إنها تدعم المعلومات.", "حوّل النتيجة لشكل تقدر تستخدمه أو ترجع له."]
+                    }
+                ]
+            },
+            {
+                title: "تاسكات الأسبوع الثالث: المحتوى والتواصل البصري",
+                deadline: "",
+                tasks: [
+                    {
+                        id: "task-lecture-05",
+                        lectureId: "lecture-05",
+                        required: true,
+                        text: "حوّل فكرة حقيقية إلى محتوى جاهز للاستخدام",
+                        brief: "اختار فكرة أو بحثًا يخصك، وحدد الجمهور والهدف والنبرة، ثم حوّله إلى بوست أو مقال أو إيميل أو سكريبت أو عرض تقديمي.",
+                        ideas: ["حدد الجمهور والهدف قبل الكتابة.", "اختار نوع المحتوى الأنسب لاستخدامك.", "راجع النبرة والمعلومات وخلي المخرج قابلًا للتعديل."]
+                    },
+                    {
+                        id: "task-lecture-06",
+                        lectureId: "lecture-06",
+                        required: true,
+                        text: "أنشئ صورة أو إنفوجرافيك يخدم فكرة حقيقية",
+                        brief: "استخدم وصفًا واضحًا أو مرجعًا بصريًا لإنتاج صورة أو إنفوجرافيك يخدم محتوى أو مشروعًا عندك.",
+                        ideas: ["حدد الرسالة والاستخدام والمقاس.", "استخدم مرجعًا بصريًا لو عندك شكل قريب من المطلوب.", "راجع النصوص والتفاصيل والوضوح قبل المشاركة."]
+                    }
+                ]
+            },
+            {
+                title: "تاسكات الأسبوع الرابع: كانفا والتطبيق المتكامل",
+                deadline: "",
+                tasks: [
+                    {
+                        id: "task-lecture-07",
+                        lectureId: "lecture-07",
+                        required: true,
+                        text: "حوّل أحد مخرجاتك إلى تصميم جاهز للنشر على Canva",
+                        brief: "اختار مخرجًا من الأسابيع السابقة، وطوّره داخل Canva إلى عرض أو كاروسيل أو إنفوجرافيك جاهز للاستخدام.",
+                        ideas: ["ابدأ بمحتوى أو صورة عملتها بالفعل.", "ظبط المقاس والألوان والخطوط والتسلسل البصري.", "شارك النسخة النهائية الجاهزة للنشر."]
+                    },
+                    {
+                        id: "task-lecture-08",
+                        lectureId: "lecture-08",
+                        required: true,
+                        text: "ابنِ أول مسار متكامل واختبره",
+                        brief: "رتّب خطوات مسار يخدم هدفًا حقيقيًا، وحدد المساعد أو المهارة أو الأداة في كل خطوة، ثم اختبر المسار من البداية للنهاية.",
+                        ideas: ["اكتب المدخل والمخرج لكل خطوة.", "أضف نقطة مراجعة بشرية في المكان المناسب.", "احذف أي خطوة لا تضيف قيمة ووثّق النتيجة داخل «مساحتي»."]
+                    }
+                ]
+            },
+            {
+                title: "تاسكات الأسبوع الخامس: البناء الرقمي والوكلاء",
+                deadline: "",
+                tasks: [
+                    {
+                        id: "task-lecture-09",
+                        lectureId: "lecture-09",
+                        required: true,
+                        text: "ابنِ موقعًا أو أداة بسيطة قابلة للمشاركة",
+                        brief: "حوّل فكرة واضحة إلى موقع أو Portfolio أو لعبة أو Quiz أو أداة تعمل، ثم اختبرها على الموبايل وشارك الرابط.",
+                        ideas: ["ابدأ بأبسط نسخة تنفذ الوظيفة الأساسية.", "عدّل النصوص والصور واصلح الأخطاء الظاهرة.", "تأكد إن الرابط يعمل والتجربة مناسبة للموبايل."]
+                    },
+                    {
+                        id: "task-lecture-10",
+                        lectureId: "lecture-10",
+                        required: true,
+                        text: "نفّذ مهمة حقيقية باستخدام وكيل أو متصفح وكيل",
+                        brief: "اختار مهمة متعددة الخطوات مثل البحث أو تجهيز مسودة إيميل أو المقارنة، ونفّذها باستخدام وكيل ثم راجع النتيجة بنفسك.",
+                        ideas: ["اختار مهمة حقيقية كنت هتنفذها يدويًا.", "راقب الخطوات ولا توافق على أي إجراء مهم من غير مراجعة.", "وثّق المهمة والنتيجة والجزء اللي احتاج تدخلك."]
+                    }
+                ]
+            },
+            {
+                title: "تاسكات الأسبوع السادس: صناعة الفيديو",
+                deadline: "",
+                tasks: [
+                    {
+                        id: "task-lecture-11",
+                        lectureId: "lecture-11",
+                        required: true,
+                        text: "حوّل فكرة إلى Storyboard ومشاهد فيديو",
+                        brief: "اكتب فكرة قصيرة، قسّمها لمشاهد، وحدد لكل مشهد الصورة والحركة والكاميرا أو الـ First Frame والـ Last Frame.",
+                        ideas: ["حدد الهدف والجمهور ومدة الفيديو.", "اكتب كل مشهد بشكل واضح وقابل للتنفيذ.", "ولّد مشهدًا واحدًا على الأقل لاختبار الاتجاه."]
+                    },
+                    {
+                        id: "task-lecture-12",
+                        lectureId: "lecture-12",
+                        required: true,
+                        text: "أنتج فيديو قصيرًا كاملًا قابلًا للنشر",
+                        brief: "استخدم المشاهد التي جهزتها، واجمعها بالمونتاج مع الإيقاع والترجمة المناسبة حتى تصل لفيديو قصير متماسك.",
+                        ideas: ["رتّب المشاهد في قصة واضحة.", "راجع الانتقالات والإيقاع وجودة الصوت والترجمة.", "صدّر النسخة النهائية وشارك الفيديو."]
+                    }
+                ]
+            },
+            {
+                title: "تاسكات الأسبوع السابع: الصوت والشخصية الرقمية",
+                deadline: "",
+                tasks: [
+                    {
+                        id: "task-lecture-13",
+                        lectureId: "lecture-13",
+                        required: true,
+                        text: "أنتج Voiceover احترافيًا لنص قصير",
+                        brief: "جهّز نصًا مناسبًا للأداء الصوتي، واختر صوتًا ونبرة وسرعة ووقفات مناسبة، ثم شارك النسخة النهائية.",
+                        ideas: ["اكتب النص للنطق مش للقراءة فقط.", "جرّب النبرة والسرعة والوقفات قبل التصدير.", "لو هتستنسخ صوتًا، استخدمه بموافقة صاحبه."]
+                    },
+                    {
+                        id: "task-lecture-14",
+                        lectureId: "lecture-14",
+                        required: true,
+                        text: "أنشئ فيديو أفاتار متكلمًا",
+                        brief: "اختار شخصية وصوتًا، اربطهما مع Lip Sync مناسب، وأنتج فيديو أفقيًا أو رأسيًا يخدم شرحًا أو محتوى أو خدمة.",
+                        ideas: ["حدد استخدام الفيديو والمقاس قبل البداية.", "راجع شكل الشخصية والصوت والمزامنة.", "صدّر نسخة قصيرة جاهزة للمشاركة."]
+                    }
+                ]
+            },
+            {
+                title: "تاسكات الأسبوع الثامن: تجميع الرحلة ومشروع التخرج",
+                deadline: "",
+                tasks: [
+                    {
+                        id: "task-lecture-15",
+                        lectureId: "lecture-15",
+                        required: true,
+                        text: "راجع ووثّق أقوى مسار بنيته",
+                        brief: "اختار أهم مسار عندك، نظّف خطواته ومساعديه ومهاراته، وأضف نقاط المراجعة البشرية ومثالًا حقيقيًا على نتيجته.",
+                        ideas: ["احذف أي خطوة أو مساعد لم تستخدمه فعلًا.", "وضّح وظيفة كل عنصر داخل المسار.", "أضف النتيجة والفرق الحقيقي اللي صنعه معاك."]
+                    },
+                    {
+                        id: "task-lecture-16",
+                        lectureId: "lecture-16",
+                        required: true,
+                        text: "جهّز النسخة شبه النهائية من موقع مشروع التخرج",
+                        brief: "اجمع رحلتك ومساعديك ومهاراتك ومساراتك وأقوى نتائجك داخل الموقع، ثم راجع التصميم وتجربة الموبايل.",
+                        ideas: ["اكتب عملت كل عنصر ليه وفرق معاك إزاي.", "أضف الصور والفيديوهات والعروض والروابط المهمة.", "اختبر الموقع على الموبايل وتأكد إن كل الأقسام واضحة."]
+                    }
+                ]
+            },
+            {
+                title: "تاسكات الأسبوع التاسع: عرض ومراجعة مشاريع التخرج",
+                deadline: "",
+                tasks: [
+                    {
+                        id: "task-lecture-17",
+                        lectureId: "lecture-17",
+                        required: true,
+                        text: "راجع مشروع التخرج وأصلح النسخة النهائية",
+                        brief: "اختبر الموقع والمسارات والروابط، أصلح المشكلات، وحسّن الشرح والتصميم بناءً على المراجعة.",
+                        ideas: ["افتح كل رابط وصورة وفيديو وتأكد إنهم يعملوا.", "راجع وضوح المساعدين والمهارات والمسارات.", "نفّذ التعديلات وجهّز رابط النسخة النهائية."]
+                    },
+                    {
+                        id: "task-lecture-18",
+                        lectureId: "lecture-18",
+                        required: true,
+                        text: "انشر واعرض مشروع تخرجك النهائي",
+                        brief: "شارك موقعك المنشور واحكِ رحلتك وأهم النتائج والمساعدين والمهارات والمسارات التي صنعت فرقًا معك.",
+                        ideas: ["اختار أقوى النتائج بدل استعراض كل شيء.", "وضّح قبل وبعد والفرق الحقيقي اللي حصل.", "اختم بخطتك العملية بعد الدبلومة."]
+                    }
+                ],
+                note: "تاسكان إجباريان فقط. الجودة والمنطق أهم من العدد؛ اعرض فقط ما استخدمته فعلًا وصنع فرقًا معك.",
+                isFinal: true
+            }
+        ];
+
+        const LEGACY_TASK_GUIDANCE_BY_WEEK = [
             [
                 'اختار موقفًا حقيقيًا عايز AI يساعدك فيه: شغل، دراسة أو حياة يومية.',
                 'حدد النتيجة اللي عايز تخرج بيها قبل ما تبدأ المحادثة.',
@@ -2892,7 +3282,55 @@
             ]
         ];
 
-        const TASK_PRESENTATION_BY_WEEK = [
+        const TASK_GUIDANCE_BY_WEEK = [
+            [
+                "ابدأ بهدف حقيقي تقدر تلاحظ أثره في شغلك أو دراستك أو حياتك.",
+                "اختبر المساعد والمهارة على مثال فعلي وعدّل التعليمات بناءً على النتيجة.",
+                "وثّق أول شكل لمسارك حتى لو كان بسيطًا."
+            ],
+            [
+                "اختار موضوعًا تتعلمه أو تبحث عنه فعلًا.",
+                "راجع المصادر قبل اعتماد أي معلومة.",
+                "احفظ البحث ومساحة التعلم والمهمة المجدولة داخل مساحتك."
+            ],
+            [
+                "حدّد الجمهور والهدف والنبرة قبل الكتابة أو التصميم.",
+                "استخدم مرجعًا بصريًا واضحًا بدل الوصف العام.",
+                "اجمع خطوات المحتوى والصور والعرض في مسار واحد."
+            ],
+            [
+                "ابدأ بمخرج حقيقي من الأسابيع السابقة وحوّله لتصميم جاهز.",
+                "اكتب مدخل ومخرج كل خطوة في المسار.",
+                "اختبر المسار كاملًا وعدّل أي خطوة لا تضيف قيمة."
+            ],
+            [
+                "ابدأ بنسخة بسيطة تعمل من الموقع قبل إضافة التفاصيل.",
+                "اختبر الموقع على الموبايل وأصلح الأخطاء بالصور ولقطات الشاشة.",
+                "استخدم الوكيل في تنفيذ حقيقي، ثم راجع النتيجة بنفسك."
+            ],
+            [
+                "حدّد الهدف والجمهور والستايل قبل تقسيم المشاهد.",
+                "راجع ثبات الشخصية والحركة والإيقاع بين المشاهد.",
+                "احتفظ بالـ Storyboard والمساعد والمهارة لإعادة الاستخدام."
+            ],
+            [
+                "اكتب النص بطريقة تناسب النطق والأداء، مش القراءة فقط.",
+                "استخدم استنساخ الصوت بشكل مسؤول وبموافقة صاحبه.",
+                "راجع الـ Lip Sync والنبرة والسرعة قبل التصدير."
+            ],
+            [
+                "احذف أي مساعد أو خطوة لم تستخدمها فعلًا.",
+                "أضف سبب البناء والفرق الحقيقي ومثالًا أو رابطًا لكل عنصر.",
+                "راجع تجربة الموقع على الموبايل قبل العرض."
+            ],
+            [
+                "اختبر كل الروابط والصور والفيديوهات قبل العرض.",
+                "احكِ الرحلة والنتائج بوضوح بدل استعراض عدد الأدوات.",
+                "اختم بخطتك العملية لما بعد الدبلومة."
+            ]
+        ];
+
+        const LEGACY_TASK_PRESENTATION_BY_WEEK = [
             [{ title:'ابنِ أول محادثة احترافية في مجالك', summary:'اختار استخدامًا حقيقيًا يهمك، وابنِ محادثة واضحة مع ChatGPT أو Gemini لحد ما توصل لنتيجة قابلة للاستخدام.', ideas:['حدد هدفك والسياق قبل ما تبدأ.','استخدم Prompt Mood لو محتاج مساعدة في صياغة الطلب.','كمّل النقاش وعدّل النتيجة بدل ما تكتفي بأول رد.'] }],
             [
                 { title:'اعمل بحثًا شاملًا في موضوع يهمك', summary:'اختار موضوعًا من شغلك أو دراستك واعمل عنه بحثًا منظمًا تقدر ترجع له.', ideas:['حدد السؤال والنتيجة اللي محتاجها.','اطلب مصادر وروابط واضحة وراجعها.','شارك البحث كنص أو صفحة أو ملف مرتب.'] },
@@ -2910,10 +3348,11 @@
             [{ title:'ابنِ موقعًا أو تطبيقًا بسيطًا', summary:'اختار مشكلة صغيرة وابنِ لها موقعًا أو أداة قابلة للتجربة والمشاركة.', ideas:['حدد المستخدم والوظيفة الأساسية.','ابدأ بأبسط نسخة تعمل فعلًا.','اختبرها على الموبايل وشارك الرابط.'] }],
             [{ title:'سلّم مشروع تخرجك وقصة تطورك', summary:'اجمع أقوى استخداماتك ومخرجاتك في مشروع واضح يبين الفرق اللي صنعه AI معاك.', ideas:['اختار أقوى حالتين أو ثلاث حالات استخدام.','وضح المشكلة والطريقة والنتيجة.','رتب الروابط والمخرجات واستعد للـFeedback.'] }]
         ];
+        const TASK_PRESENTATION_BY_WEEK = Array.from({ length: COURSE_WEEK_COUNT }, () => []);
         const getTaskPresentation = (weekIndex, taskIndex, taskObj) => TASK_PRESENTATION_BY_WEEK[weekIndex]?.[taskIndex] || {
-            title: getTaskShortTitle(taskObj, taskIndex),
+            title: (typeof taskObj === 'object' && taskObj.title) || getTaskShortTitle(taskObj, taskIndex),
             summary: typeof taskObj === 'string' ? taskObj : (taskObj.brief || taskObj.text || ''),
-            ideas: TASK_GUIDANCE_BY_WEEK[weekIndex] || []
+            ideas: (typeof taskObj === 'object' && taskObj.ideas) || TASK_GUIDANCE_BY_WEEK[weekIndex] || []
         };
         const cleanWeekTitle = value => String(value || '').replace(/^تاسكات\s+/,'').replace(/^الأسبوع\s+(\d+)\s*:\s*/,'الأسبوع $1 — ').trim();
 
@@ -3111,7 +3550,7 @@
                     <button type="button" onClick={() => setIsOpen(prev => !prev)} className="task-studio-header" aria-expanded={isOpen}>
                         <span className={`task-week-icon ${status === 'completed' ? 'done' : ''}`}><Icon name={status === 'completed' ? 'badge-check' : 'rocket'} className="w-6 h-6" /></span>
                         <div className="flex-grow min-w-0">
-                            <div className="flex flex-wrap items-center gap-2 mb-2"><span className={`task-status-badge task-status-${status}`}>{statusLabel}</span><span className="text-xs font-bold text-[--accent-green]">تاسك {taskIndex + 1}</span></div>
+                            <div className="flex flex-wrap items-center gap-2 mb-2"><span className={`task-status-badge task-status-${status}`}>{statusLabel}</span><span className="text-xs font-bold text-[--accent-green]">تاسك {taskIndex + 1}</span>{taskObj?.required && <span className="text-xs font-bold text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/40 px-2 py-1 rounded-full">إجباري</span>}</div>
                             <h4 className="font-bold text-lg text-[--accent-navy] dark:text-white leading-relaxed">{presentation.title}</h4>
                             <p className="text-sm text-gray-500 dark:text-gray-300 mt-1">{status === 'completed' ? 'اضغط لمراجعة اللي سجلته أو مشاركته.' : 'اضغط وسجّل تطبيقك في أقل من دقيقة.'}</p>
                         </div>
@@ -4791,8 +5230,8 @@
                         <p className="text-gray-700 dark:text-gray-200 leading-relaxed mb-3">الدبلومة مدتها شهرين، لكن علاقتنا بالذكاء الاصطناعي مستمرة. مجتمع الخريجين مساحة خاصة بخريجي Smarter With AI نشارك فيها تحديثات عالم الذكاء الاصطناعي، ونشرح إزاي نستفيد منها في الشغل والدراسة.</p>
                         <p className="text-gray-700 dark:text-gray-200 leading-relaxed mb-4">عندنا لايف شهري في آخر أسبوع من كل شهر لشرح التحديثات، استخدامات متقدمة، والإجابة عن أسئلتكم واستفساراتكم بإذن الله.</p>
                         <div className="alumni-benefit-box mb-5 text-sm sm:text-base leading-relaxed"><strong className="text-[--accent-navy] dark:text-[--accent-green]">مجتمع الدفعة جزء من رحلتك؛ اسأل وشارك تطبيقاتك وكمل مع زملائك.</strong></div>
-                        <div className="alumni-cta-row"><a href={DIPLOMA_EVALUATION_URL} target="_blank" rel="noopener noreferrer" className="text-white bg-gradient-to-r from-[--accent-green] to-[--accent-navy] hover:opacity-90 font-bold rounded-xl text-base sm:text-lg px-7 py-3.5 text-center transition-transform transform hover:scale-[1.02] inline-flex items-center justify-center gap-2"><Icon name="clipboard-check" /><span>قيّم الدبلومة واستلم رابط الانضمام</span></a></div>
-                        <p className="text-xs text-gray-500 dark:text-gray-300 mt-3">رابط الانضمام للمجتمع موجود في نهاية فورم تقييم الدبلومة.</p>
+                        <div className="alumni-cta-row"><a href={ROUND5_WHATSAPP_COMMUNITY_URL} target="_blank" rel="noopener noreferrer" className="text-white bg-gradient-to-r from-[--accent-green] to-[--accent-navy] hover:opacity-90 font-bold rounded-xl text-base sm:text-lg px-7 py-3.5 text-center transition-transform transform hover:scale-[1.02] inline-flex items-center justify-center gap-2"><Icon name="message-circle" /><span>انضم لمجتمع الدفعة على واتساب</span></a></div>
+                        <p className="text-xs text-gray-500 dark:text-gray-300 mt-3">الرابط مخصص لطلاب الدفعة الخامسة.</p>
                     </div>
                 </div>
             );
@@ -5057,7 +5496,7 @@
             <div className="student-profile-panel p-5 sm:p-6 mb-6 space-y-4">
                 <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                     <div className="profile-avatar !w-14 !h-14 !bg-[--accent-navy] text-xl">{profile.firstName.charAt(0)}</div>
-                    <div className="flex-grow"><h3 className="text-xl font-bold text-[--accent-navy] dark:text-white">{profile.firstName}</h3>{profile.profession && <p className="text-sm font-bold text-[--accent-green] mt-1">{profile.profession}</p>}<p className="text-sm text-gray-600 dark:text-gray-300 mt-1">بدأت الرحلة يوم {formatArabicDate(profile.startDate)} · {APP_PROFILE_MODE_LABEL} · {profile.gender === 'female' ? 'مؤنث' : 'مذكر'}</p></div>
+                    <div className="flex-grow"><h3 className="text-xl font-bold text-[--accent-navy] dark:text-white">{profile.firstName}</h3>{profile.profession && <p className="text-sm font-bold text-[--accent-green] mt-1">{profile.profession}</p>}<p className="text-sm text-gray-600 dark:text-gray-300 mt-1">بدأت الرحلة يوم {formatArabicDate(OFFICIAL_COHORT_START_DATE)} · {APP_PROFILE_MODE_LABEL} · {profile.gender === 'female' ? 'مؤنث' : 'مذكر'}</p></div>
                     <button onClick={onEditProfile} className="btn-brand-navy px-4 py-2 rounded-lg font-bold inline-flex items-center justify-center gap-2"><Icon name="user-cog" className="w-4 h-4" /> تعديل بياناتي</button>
                 </div>
                 {profile.learningGoal && <div className="goal-profile-preview"><span className="font-bold text-[--accent-green]">هدفي:</span><p className="text-sm text-gray-700 dark:text-gray-200 mt-1 whitespace-pre-wrap">{profile.learningGoal}</p></div>}
