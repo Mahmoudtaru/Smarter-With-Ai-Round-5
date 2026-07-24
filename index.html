@@ -2637,7 +2637,6 @@
             const CURRENT_WEEK_INDEX = currentWeekIndex
             const DEFAULT_OPEN_WEEK_INDEX = APP_MODE === 'live' ? CURRENT_WEEK_INDEX : getRecommendedWeekIndex();
             const [openWeek, setOpenWeek] = useState(lecturesData[DEFAULT_OPEN_WEEK_INDEX]?.title || null);
-            const [isAvailabilityOpen, setAvailabilityOpen] = useState(false);
             const [completedLectures, setCompletedLectures] = useState(() => {
                 try {
                     const saved = localStorage.getItem(LECTURE_COMPLETION_KEY);
@@ -2719,8 +2718,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <LectureFeedbackBox />
 
                     <div className="space-y-4 mt-6">
                         {lecturesData.map((week, index) => {
@@ -2811,13 +2808,7 @@
                         })}
                     </div>
 
-                    <Accordion
-                        title={APP_AVAILABILITY_TITLE}
-                        isOpen={isAvailabilityOpen}
-                        onToggle={() => setAvailabilityOpen(!isAvailabilityOpen)}
-                    >
-                        <div className="text-gray-700 dark:text-gray-300 space-y-2 leading-relaxed"><p>{APP_AVAILABILITY_COPY}</p></div>
-                    </Accordion>
+                    <LectureFeedbackBox />
                 </div>
             );
         };
