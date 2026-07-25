@@ -2033,8 +2033,28 @@
                 summary: "الأسبوع ده هيساعدك تفهم إمكانيات النماذج اللغوية وإزاي تتواصل صح معاها، كمان هتتعلم إزاي تبني أول مساعد شخصي ليك.",
                 icon: "brain-circuit",
                 lectures: [
-                    { id: "lecture-01", title: "المحاضرة 1: البداية الصح", summary: "هنتعرف مع بعض على نظام الدبلومة، وبعدها هنبدأ نتكلم عن النماذج اللغوية: إيه إمكانياتها وإزاي نتواصل معاها صح عشان نطلع بأفضل نتيجة." },
-                    { id: "lecture-02", title: "المحاضرة 2: ابنِ أول موظف ذكي", summary: "هتتعلم إزاي تبني أول مساعد شخصي ليك يساعدك في مهمة بتعملها باستمرار، وإزاي تختبره وتطوره لحد ما يشتغل بالطريقة اللي تناسبك." }
+                    {
+                        id: "lecture-01",
+                        title: "المحاضرة 1: البداية الصح",
+                        summary: "هنتعرف مع بعض على نظام الدبلومة، وبعدها هنبدأ نتكلم عن النماذج اللغوية: إيه إمكانياتها وإزاي نتواصل معاها صح عشان نطلع بأفضل نتيجة.",
+                        sourceType: "youtube",
+                        youtubeId: "SxeAFPW6L3Y",
+                        sourceUrl: "https://youtu.be/SxeAFPW6L3Y?si=GSyemO00shCIFvyl",
+                        attachments: [
+                            {
+                                title: "كتيب نظام الدبلومة",
+                                url: "https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Week-1-Lecture-0/",
+                                description: "كل تفاصيل نظام الدبلومة ومواعيد المحاضرات وطريقة الاستفادة من التطبيق.",
+                                icon: "route"
+                            },
+                            {
+                                title: "كتيب شرح المحاضرة الأولى",
+                                url: "https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Week-1-Lecture-1/",
+                                description: "شرح مرتب لأفكار المحاضرة عشان تراجعها وترجع لها في أي وقت.",
+                                icon: "book-open-text"
+                            }
+                        ]
+                    }
                 ]
             },
             {
@@ -3033,17 +3053,9 @@
                         text: "شاركنا محادثة تواصلت فيها مع الذكاء الاصطناعي باحترافية",
                         brief: "اختار موقفًا حقيقيًا، اشرح السياق بوضوح، وحدد النتيجة اللي محتاجها، وبعد ما توصل لمخرج مناسب شارك رابط المحادثة.",
                         ideas: ["اختار استخدامًا حقيقيًا من شغلك أو دراستك.", "وضّح السياق والهدف والشكل المطلوب للنتيجة.", "راجع الرد وكمل المحادثة لحد ما توصل للمخرج اللي محتاجه."]
-                    },
-                    {
-                        id: "task-lecture-02",
-                        lectureId: "lecture-02",
-                        required: true,
-                        text: "ابنِ أول مساعد شخصي «موظف» عندك",
-                        brief: "اختار مهمة بتتكرر معاك، وابنِ لها مساعدًا شخصيًا واضح الوظيفة، اختبره على حالة حقيقية، ثم شارك الرابط والنتيجة.",
-                        ideas: ["حدد وظيفة واحدة واضحة للمساعد.", "اكتب له التعليمات والسياق والمخرج المطلوب.", "اختبره بمثال حقيقي وعدّل تعليماته قبل المشاركة."]
                     }
                 ],
-                note: "تاسكان إجباريان فقط: تاسك واحد بعد كل محاضرة."
+                note: "التاسك الأول متاح دلوقتي؛ نفّذه بعد المحاضرة وشاركنا النتيجة."
             },
             {
                 title: "تاسكات الأسبوع الثاني: التعلم والبحث الذكي",
@@ -3685,8 +3697,9 @@
             const updateCustomEntry = (id, patch) => { const next=customEntries.map(entry => entry.id === id ? {...entry,...patch} : entry); localStorage.setItem(CUSTOM_TASKS_KEY, JSON.stringify(next)); setCustomTasks(next); dispatchSmarterEvent('smarter-custom-tasks-updated'); };
             const deleteCustomEntry = id => { if (!confirm('تحذف الإضافة دي؟')) return; const next=customEntries.filter(entry => entry.id !== id); localStorage.setItem(CUSTOM_TASKS_KEY, JSON.stringify(next)); setCustomTasks(next); dispatchSmarterEvent('smarter-custom-tasks-updated'); };
             const toggleCustomField = field => setCustomDraft(current => ({...current, fields:current.fields.includes(field) ? current.fields.filter(value => value !== field) : [...current.fields,field]}));
-            const totalCount = taskWeeks.reduce((sum, week) => sum + (week.tasks?.length || 0), 0);
-            const completedCount = taskWeeks.reduce((sum, week, weekIndex) => sum + (week.tasks || []).filter((task, idx) => records[getTaskWorkspaceId(weekIndex, task, idx)]?.status === 'completed').length, 0);
+            const releasedTaskWeeks = taskWeeks.slice(0, Math.min((currentWeekIndex || 0) + 1, taskWeeks.length));
+            const totalCount = releasedTaskWeeks.reduce((sum, week) => sum + (week.tasks?.length || 0), 0);
+            const completedCount = releasedTaskWeeks.reduce((sum, week, weekIndex) => sum + (week.tasks || []).filter((task, idx) => records[getTaskWorkspaceId(weekIndex, task, idx)]?.status === 'completed').length, 0);
             const overallProgress = totalCount ? (completedCount / totalCount) * 100 : 0;
             return <div className="space-y-4">
                 <Reminder>نفّذت التاسك؟ سجّل اللي عملته بسرعة، وحط رابط المخرج لو موجود. باقي التفاصيل اختيارية.</Reminder>
@@ -4721,17 +4734,6 @@
                 <div className="space-y-8">
                     <Reminder>{reminderText}</Reminder>
                     
-                    <div className="text-center">
-                         <a 
-                            href="https://t.me/c/3331953900/11" 
-                            target="_blank"
-                            className="btn-action-gradient hover:opacity-90 font-medium rounded-lg text-lg px-8 py-3 text-center transition-transform transform hover:scale-105 inline-flex items-center justify-center gap-2 shadow-md"
-                        >
-                            <Icon name="gift" className="w-5 h-5"/>
-                            <span>الذهاب إلى قناة البونص (تليجرام)</span>
-                        </a>
-                    </div>
-
                     <div className="workflows-highlight-card border-2 border-[--accent-green] rounded-xl p-6 text-center shadow-md transform transition-all hover:scale-[1.01]">
                         <a 
                             href="https://mahmoudtaru.github.io/Smarter-Workflows/" 
@@ -4792,16 +4794,6 @@
                                 features={["مساعدون في مختلف المجالات", "جاهزون للاستخدام المباشر", "تحديثات مستمرة", "يوفر وقت بناء الأوامر"]}
                                 linkUrl="https://mahmoudtaru.github.io/Smarter-Gifts/"
                                 linkLabel="زيارة موقع المساعدين"
-                            />
-                            <div className="my-4"></div>
-                            <HeroToolCard
-                                title="شرح المساعدين (المحاضرة)"
-                                icon="play-circle"
-                                description="محاضرة تفصيلية تشرح كيفية استخدام المساعدين الشخصيين وتطبيقهم عملياً لزيادة إنتاجيتك وتحقيق أقصى استفادة."
-                                featuresTitle="تتضمن المحاضرة:"
-                                features={["فهم آلية عمل المساعدين", "تطبيقات وأمثلة عملية", "أفضل الممارسات", "كيفية دمجهم في مسار عملك"]}
-                                linkUrl="https://t.me/c/3331953900/11/29"
-                                linkLabel="مشاهدة المحاضرة"
                             />
                         </Accordion>
 
@@ -5634,6 +5626,38 @@
             );
         };
 
+        const LectureReleasePopup = ({ onClose, onPlay }) => (
+            <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[1000] p-4" onClick={onClose}>
+                <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-white/20" onClick={event => event.stopPropagation()}>
+                    <div className="bg-gradient-to-br from-[--accent-navy] to-slate-900 text-white p-6 sm:p-8 text-center relative">
+                        <button type="button" onClick={onClose} aria-label="إغلاق الإعلان" className="absolute top-4 left-4 p-2 rounded-full bg-white/10 hover:bg-white/20">
+                            <Icon name="x" className="w-5 h-5" />
+                        </button>
+                        <span className="w-16 h-16 rounded-2xl bg-[--accent-green] inline-flex items-center justify-center shadow-lg mb-4">
+                            <Icon name="play-circle" className="w-9 h-9" />
+                        </span>
+                        <p className="text-[--accent-green] font-bold mb-2">نزلت دلوقتي 🎉</p>
+                        <h2 className="text-2xl sm:text-3xl font-bold leading-relaxed">المحاضرة الأولى متاحة</h2>
+                        <p className="text-white/85 mt-3 leading-relaxed">الحق اسمعها واعمل التاسك بتاعها، عشان ممكن تكسب اشتراك Google Pro أو Canva Pro.</p>
+                    </div>
+                    <div className="p-5 sm:p-6 space-y-3">
+                        <button type="button" onClick={onPlay} className="btn-brand-primary w-full py-3.5 px-5 rounded-xl font-bold inline-flex items-center justify-center gap-2">
+                            <Icon name="play" className="w-5 h-5 fill-current" /> شغّل المحاضرة داخل التطبيق
+                        </button>
+                        <div className="grid sm:grid-cols-2 gap-3">
+                            <a href="https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Week-1-Lecture-0/" target="_blank" rel="noopener noreferrer" className="share-card-button rounded-xl py-3 px-4 font-bold inline-flex items-center justify-center gap-2">
+                                <Icon name="route" className="w-5 h-5" /> نظام الدبلومة
+                            </a>
+                            <a href="https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Week-1-Lecture-1/" target="_blank" rel="noopener noreferrer" className="share-card-button rounded-xl py-3 px-4 font-bold inline-flex items-center justify-center gap-2">
+                                <Icon name="book-open-text" className="w-5 h-5" /> شرح المحاضرة
+                            </a>
+                        </div>
+                        <button type="button" onClick={onClose} className="w-full text-sm font-bold text-gray-500 dark:text-gray-300 py-2">هشوفها بعدين</button>
+                    </div>
+                </div>
+            </div>
+        );
+
         const GlobalVoiceTyping = () => {
             const [target, setTarget] = useState(null);
             const [position, setPosition] = useState(null);
@@ -5716,6 +5740,7 @@
             const [profile, setProfile] = useState(() => safeJsonParse(localStorage.getItem(PROFILE_KEY), null));
             const [isEditingProfile, setIsEditingProfile] = useState(false);
             const [achievement, setAchievement] = useState(null);
+            const [showLectureRelease, setShowLectureRelease] = useState(() => sessionStorage.getItem('round5Lecture1ReleaseSeen') !== '1');
             const currentWeekIndex = getCurrentWeekIndex(profile);
 
             useEffect(() => { const storedTheme = localStorage.getItem('theme'); const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; setTheme(storedTheme === 'dark' || (!storedTheme && prefersDark) ? 'dark' : 'light'); }, []);
@@ -5740,10 +5765,25 @@
             const handleOpenTaskWeek = useCallback((weekIndex) => { setTaskFocusId(null); setTaskFocusIndex(weekIndex); setActiveTab('tasks'); window.setTimeout(() => document.getElementById(`task-week-${weekIndex}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120); }, []);
             const handleOpenExactTask = useCallback((weekIndex, taskId) => { setTaskFocusIndex(weekIndex); setTaskFocusId(taskId); setActiveTab('tasks'); window.setTimeout(() => document.getElementById(`task-item-${encodeURIComponent(taskId)}`)?.scrollIntoView({ behavior:'smooth', block:'center' }), 260); }, []);
             const handleFloatLecture = useCallback(({ weekTitle, lecture }) => setFloatingLecture({ weekTitle, lecture }), []);
+            const closeLectureRelease = useCallback(() => {
+                sessionStorage.setItem('round5Lecture1ReleaseSeen', '1');
+                setShowLectureRelease(false);
+            }, []);
+            const playReleasedLecture = useCallback(() => {
+                const week = lecturesData[0];
+                const lecture = week?.lectures?.[0];
+                if (lecture) {
+                    setActiveTab('lectures');
+                    setLectureFocusIndex(0);
+                    setFloatingLecture({ weekTitle: week.title, lecture });
+                }
+                closeLectureRelease();
+            }, [closeLectureRelease]);
             const tabPanelClass = (tabId) => activeTab === tabId ? 'tab-content-anim' : 'tab-panel-hidden';
             return (
                 <div id="app-content">
                     {(!profile || isEditingProfile) && <OnboardingModal initialProfile={isEditingProfile ? profile : null} onSave={saveProfile} onCancel={() => setIsEditingProfile(false)} />}
+                    {profile && showLectureRelease && <LectureReleasePopup onClose={closeLectureRelease} onPlay={playReleasedLecture} />}
                     <AchievementToast achievement={achievement} onClose={() => setAchievement(null)} />
                     {modalMessage && <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[999] p-4" onClick={() => setModalMessage(null)}><div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg text-center w-full max-w-sm" onClick={e => e.stopPropagation()}><Icon name="info" className="w-14 h-14 text-[--accent-green] mx-auto mb-4" /><p className="text-gray-700 dark:text-gray-200 mb-6 leading-relaxed">{modalMessage}</p><button onClick={() => setModalMessage(null)} className="btn-action-gradient font-bold py-2.5 px-8 rounded-lg">تمام</button></div></div>}
                     <Header theme={theme} onThemeToggle={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')} profile={profile} onEditProfile={() => setIsEditingProfile(true)} />
