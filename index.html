@@ -1224,6 +1224,37 @@
         }
 
     </style>
+
+    <script>
+        // Preserve data created by older Round 5 builds when storage keys changed.
+        (function migrateSmarterLegacyStorage() {
+            const aliases = {
+                'smarterStudentProfileV1:round5-live': ['smarterStudentProfileV1:round5', 'smarterStudentProfileV1'],
+                'lectureCompletionStatus:round5-live': ['lectureCompletionStatus:round5', 'lectureCompletionStatus'],
+                'smartTaskWorkspaceV2:round5-live': ['smartTaskWorkspaceV2:round5', 'smartTaskWorkspaceV2', 'smartTaskWorkspaceV1:round5-live', 'smartTaskWorkspaceV1:round5'],
+                'smartCustomTasksV1:round5-live': ['smartCustomTasksV1:round5', 'smartCustomTasksV1'],
+                'smarterGoalCheckinsV1:round5-live': ['smarterGoalCheckinsV1:round5', 'smarterGoalCheckinsV1'],
+                'smartPersonalSpaceUrlV1:round5-live': ['smartPersonalSpaceUrlV1:round5', 'smartPersonalSpaceUrlV1'],
+                'smartCustomToolsV1:round5-live': ['smartCustomToolsV1:round5', 'smartCustomToolsV1'],
+                'smartToolCategoriesV1:round5-live': ['smartToolCategoriesV1:round5', 'smartToolCategoriesV1'],
+                'smartFavoriteToolsV1:round5-live': ['smartFavoriteToolsV1:round5', 'smartFavoriteToolsV1'],
+                'smartFavoriteAssistantsV1:round5-live': ['smartFavoriteAssistantsV1:round5', 'smartFavoriteAssistantsV1'],
+                'smartCustomAssistantsV1:round5-live': ['smartCustomAssistantsV1:round5', 'smartCustomAssistantsV1'],
+                'smartCustomSkillsV1:round5-live': ['smartCustomSkillsV1:round5', 'smartCustomSkillsV1'],
+                'smartMyPathsV1:round5-live': ['smartMyPathsV1:round5', 'smartMyPathsV1'],
+                'smartCustomPathsV1:round5-live': ['smartCustomPathsV1:round5', 'smartCustomPathsV1'],
+                'smartPersonalNotes:round5-live': ['smartPersonalNotes:round5', 'smartPersonalNotes']
+            };
+            try {
+                Object.entries(aliases).forEach(([target, sources]) => {
+                    if (localStorage.getItem(target) !== null) return;
+                    const source = sources.find(key => localStorage.getItem(key) !== null);
+                    if (source) localStorage.setItem(target, localStorage.getItem(source));
+                });
+            } catch (_) {}
+        })();
+    </script>
+
 </head>
 <body class="bg-bg-light dark:bg-bg-dark text-text-dark dark:text-text-light transition-colors duration-300">
     
@@ -5872,5 +5903,6 @@
         }
         document.addEventListener('DOMContentLoaded', setupWelcomeScreen);
     </script>
+
 </body>
 </html>
