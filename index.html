@@ -2030,7 +2030,7 @@
         const lecturesData = [
             {
                 title: "الأسبوع الأول: البداية وبناء فريقك الذكي",
-                summary: "الأسبوع ده هيساعدك تفهم إمكانيات النماذج اللغوية وإزاي تتواصل صح معاها، كمان هتتعلم إزاي تبني أول مساعد شخصي ليك.",
+                summary: "الأسبوع ده هيساعدك تفهم إمكانيات النماذج اللغوية وإزاي تتواصل صح معاها، وتنظم محادثاتك ومصادرك وتبني مساحة تعلم حقيقية على NotebookLM.",
                 icon: "brain-circuit",
                 lectures: [
                     {
@@ -2052,6 +2052,28 @@
                                 url: "https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Week-1-Lecture-1/",
                                 description: "شرح مرتب لأفكار المحاضرة عشان تراجعها وترجع لها في أي وقت.",
                                 icon: "book-open-text"
+                            }
+                        ]
+                    },
+                    {
+                        id: "lecture-02",
+                        title: "المحاضرة 2: تنظيم المحادثات والتعلم في عصر الذكاء الاصطناعي",
+                        summary: "هنتعلم إزاي ننظم المحادثات والمصادر داخل Projects وNotebooks، ونتعامل مع حدود الـContext Window، ونحوّل مصادرنا لمساحة تعلم عملية على NotebookLM بالمراجع ومخرجات الـStudio المختلفة.",
+                        sourceType: "youtube",
+                        youtubeId: "lwJn1frQUGQ",
+                        sourceUrl: "https://youtu.be/lwJn1frQUGQ?si=IO6MviyaVV19QBkJ",
+                        attachments: [
+                            {
+                                title: "شرح الجزء الأول",
+                                url: "https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Week-1-Lecture-2-p1/",
+                                description: "تنظيم المحادثات والمصادر والمشاريع وطريقة الحفاظ على السياق.",
+                                icon: "folder-kanban"
+                            },
+                            {
+                                title: "شرح الجزء الثاني",
+                                url: "https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Week-1-Lecture-2-p2/",
+                                description: "التعلم في عصر الذكاء الاصطناعي واحتراف NotebookLM ومخرجات الـStudio.",
+                                icon: "notebook-tabs"
                             }
                         ]
                     }
@@ -3053,9 +3075,26 @@
                         text: "شاركنا محادثة تواصلت فيها مع الذكاء الاصطناعي باحترافية",
                         brief: "اختار موقفًا حقيقيًا، اشرح السياق بوضوح، وحدد النتيجة اللي محتاجها، وبعد ما توصل لمخرج مناسب شارك رابط المحادثة.",
                         ideas: ["اختار استخدامًا حقيقيًا من شغلك أو دراستك.", "وضّح السياق والهدف والشكل المطلوب للنتيجة.", "راجع الرد وكمل المحادثة لحد ما توصل للمخرج اللي محتاجه."]
+                    },
+                    {
+                        id: "task-lecture-02",
+                        lectureId: "lecture-02",
+                        required: true,
+                        text: "اعمل Notebook لحاجة حقيقية",
+                        brief: "اختار موضوعًا يخص دراستك أو شغلك، وابنِ له مساحة تقدر تستخدمها بعد انتهاء التاسك — مش تجربة وهمية تقفلها بعدها.",
+                        ideas: [
+                            "أنشئ Notebook باسم واضح وارفع عليه مصادر حقيقية مرتبطة بالموضوع.",
+                            "اسأل سؤالًا تحتاج إجابته فعلًا، وافتح Citation للتأكد من المصدر.",
+                            "جرّب مخرجات متنوعة من الـStudio: Audio أو Video أو Mind Map أو Flashcards أو Quiz.",
+                            "شارك الرابط بصلاحية تفتح، واكتب في سطرين: عملت المساحة لإيه؟ وفرقت معاك في إيه؟",
+                            "لو بتتعلم: استخدم محاضرات كورس، كتاب، أوراق بحثية أو مادة تريد مراجعتها.",
+                            "لو بتشرح: ارفع تسجيل درس وملفه، ثم اعمل Flashcards أو Quiz تشاركه مع الطلبة.",
+                            "لو بتشتغل: استخدم تسجيلات اجتماعات أو ملفات مشروع، ثم استخرج تقريرًا أو قائمة مهام.",
+                            "لو عندك بزنس: اجمع السياسات أو المنتجات أو أسئلة العملاء أو المحتوى اللي تحتاج ترجع له بسرعة."
+                        ]
                     }
                 ],
-                note: "التاسك الأول متاح دلوقتي؛ نفّذه بعد المحاضرة وشاركنا النتيجة."
+                note: "تاسكات الأسبوع الأول بقوا 2: طبّق كل محاضرة على حاجة حقيقية وشارك المخرج النهائي."
             },
             {
                 title: "تاسكات الأسبوع الثاني: التعلم والبحث الذكي",
@@ -5637,7 +5676,8 @@
                             <Icon name="play-circle" className="w-9 h-9" />
                         </span>
                         <p className="text-[--accent-green] font-bold mb-2">نزلت دلوقتي 🎉</p>
-                        <h2 className="text-2xl sm:text-3xl font-bold leading-relaxed">المحاضرة الأولى متاحة</h2>
+                        <h2 className="text-2xl sm:text-3xl font-bold leading-relaxed">المحاضرة الثانية متاحة</h2>
+                        <p className="text-white/75 mt-2 font-bold">تنظيم المحادثات والتعلم في عصر الذكاء الاصطناعي</p>
                         <p className="text-white/85 mt-3 leading-relaxed">الحق اسمعها واعمل التاسك بتاعها، عشان ممكن تكسب اشتراك Google Pro أو Canva Pro.</p>
                     </div>
                     <div className="p-5 sm:p-6 space-y-3">
@@ -5645,11 +5685,11 @@
                             <Icon name="play" className="w-5 h-5 fill-current" /> شغّل المحاضرة داخل التطبيق
                         </button>
                         <div className="grid sm:grid-cols-2 gap-3">
-                            <a href="https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Week-1-Lecture-0/" target="_blank" rel="noopener noreferrer" className="share-card-button rounded-xl py-3 px-4 font-bold inline-flex items-center justify-center gap-2">
-                                <Icon name="route" className="w-5 h-5" /> نظام الدبلومة
+                            <a href="https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Week-1-Lecture-2-p1/" target="_blank" rel="noopener noreferrer" className="share-card-button rounded-xl py-3 px-4 font-bold inline-flex items-center justify-center gap-2">
+                                <Icon name="folder-kanban" className="w-5 h-5" /> شرح الجزء الأول
                             </a>
-                            <a href="https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Week-1-Lecture-1/" target="_blank" rel="noopener noreferrer" className="share-card-button rounded-xl py-3 px-4 font-bold inline-flex items-center justify-center gap-2">
-                                <Icon name="book-open-text" className="w-5 h-5" /> شرح المحاضرة
+                            <a href="https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Week-1-Lecture-2-p2/" target="_blank" rel="noopener noreferrer" className="share-card-button rounded-xl py-3 px-4 font-bold inline-flex items-center justify-center gap-2">
+                                <Icon name="notebook-tabs" className="w-5 h-5" /> شرح الجزء الثاني
                             </a>
                         </div>
                         <button type="button" onClick={onClose} className="w-full text-sm font-bold text-gray-500 dark:text-gray-300 py-2">هشوفها بعدين</button>
@@ -5740,7 +5780,7 @@
             const [profile, setProfile] = useState(() => safeJsonParse(localStorage.getItem(PROFILE_KEY), null));
             const [isEditingProfile, setIsEditingProfile] = useState(false);
             const [achievement, setAchievement] = useState(null);
-            const [showLectureRelease, setShowLectureRelease] = useState(() => sessionStorage.getItem('round5Lecture1ReleaseSeen') !== '1');
+            const [showLectureRelease, setShowLectureRelease] = useState(() => sessionStorage.getItem('round5Lecture2ReleaseSeen') !== '1');
             const currentWeekIndex = getCurrentWeekIndex(profile);
 
             useEffect(() => { const storedTheme = localStorage.getItem('theme'); const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; setTheme(storedTheme === 'dark' || (!storedTheme && prefersDark) ? 'dark' : 'light'); }, []);
@@ -5766,12 +5806,12 @@
             const handleOpenExactTask = useCallback((weekIndex, taskId) => { setTaskFocusIndex(weekIndex); setTaskFocusId(taskId); setActiveTab('tasks'); window.setTimeout(() => document.getElementById(`task-item-${encodeURIComponent(taskId)}`)?.scrollIntoView({ behavior:'smooth', block:'center' }), 260); }, []);
             const handleFloatLecture = useCallback(({ weekTitle, lecture }) => setFloatingLecture({ weekTitle, lecture }), []);
             const closeLectureRelease = useCallback(() => {
-                sessionStorage.setItem('round5Lecture1ReleaseSeen', '1');
+                sessionStorage.setItem('round5Lecture2ReleaseSeen', '1');
                 setShowLectureRelease(false);
             }, []);
             const playReleasedLecture = useCallback(() => {
                 const week = lecturesData[0];
-                const lecture = week?.lectures?.[0];
+                const lecture = week?.lectures?.find(item => item.id === 'lecture-02') || week?.lectures?.[1];
                 if (lecture) {
                     setActiveTab('lectures');
                     setLectureFocusIndex(0);
