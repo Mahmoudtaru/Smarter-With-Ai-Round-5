@@ -1226,11 +1226,15 @@
     </style>
 
     <script>
-        // Preserve data created by older Round 5 builds when storage keys changed.
+        // Preserve and merge data created by every older Round 5 build.
+        // Never replace this namespace between content releases: the app content changes,
+        // while the learner's profile, progress and workspace keep the same identity.
         (function migrateSmarterLegacyStorage() {
+            const RECOVERY_KEY = 'smarterWithAI:round5:persistent-backup';
             const aliases = {
                 'smarterStudentProfileV1:round5-live': ['smarterStudentProfileV1:round5', 'smarterStudentProfileV1'],
                 'lectureCompletionStatus:round5-live': ['lectureCompletionStatus:round5', 'lectureCompletionStatus'],
+                'taskCompletionStatus:round5-live': ['taskCompletionStatus:round5', 'taskCompletionStatus'],
                 'smartTaskWorkspaceV2:round5-live': ['smartTaskWorkspaceV2:round5', 'smartTaskWorkspaceV2', 'smartTaskWorkspaceV1:round5-live', 'smartTaskWorkspaceV1:round5'],
                 'smartCustomTasksV1:round5-live': ['smartCustomTasksV1:round5', 'smartCustomTasksV1'],
                 'smarterGoalCheckinsV1:round5-live': ['smarterGoalCheckinsV1:round5', 'smarterGoalCheckinsV1'],
@@ -1245,12 +1249,61 @@
                 'smartCustomPathsV1:round5-live': ['smartCustomPathsV1:round5', 'smartCustomPathsV1'],
                 'smartPersonalNotes:round5-live': ['smartPersonalNotes:round5', 'smartPersonalNotes']
             };
+            const parse = value => {
+                try { return value === null ? null : JSON.parse(value); } catch (_) { return value; }
+            };
+            const hasUsefulData = value => Array.isArray(value) ? value.length > 0 : value && typeof value === 'object' ? Object.keys(value).length > 0 : value !== null && value !== '';
+            const mergeValues = (older, newer) => {
+                if (Array.isArray(older) || Array.isArray(newer)) {
+                    const rows = [...(Array.isArray(newer) ? newer : []), ...(Array.isArray(older) ? older : [])];
+                    const seen = new Set();
+                    return rows.filter(row => {
+                        const identity = row && typeof row === 'object' ? (row.id || row.key || JSON.stringify(row)) : String(row);
+                        if (seen.has(identity)) return false;
+                        seen.add(identity);
+                        return true;
+                    });
+                }
+                if (older && typeof older === 'object' && newer && typeof newer === 'object') return { ...older, ...newer };
+                return hasUsefulData(newer) ? newer : older;
+            };
             try {
-                Object.entries(aliases).forEach(([target, sources]) => {
-                    if (localStorage.getItem(target) !== null) return;
-                    const source = sources.find(key => localStorage.getItem(key) !== null);
-                    if (source) localStorage.setItem(target, localStorage.getItem(source));
+                const recovery = parse(localStorage.getItem(RECOVERY_KEY)) || {};
+                Object.entries(recovery).forEach(([key, savedValue]) => {
+                    if (key === RECOVERY_KEY) return;
+                    const currentValue = parse(localStorage.getItem(key));
+                    const restoredValue = currentValue === null ? savedValue : mergeValues(savedValue, currentValue);
+                    localStorage.setItem(key, typeof restoredValue === 'string' ? restoredValue : JSON.stringify(restoredValue));
                 });
+                Object.entries(aliases).forEach(([target, sources]) => {
+                    let merged = recovery[target] ?? null;
+                    sources.forEach(source => {
+                        const sourceValue = parse(localStorage.getItem(source));
+                        if (sourceValue !== null) merged = mergeValues(sourceValue, merged);
+                    });
+                    const currentValue = parse(localStorage.getItem(target));
+                    if (currentValue !== null) merged = mergeValues(merged, currentValue);
+                    if (merged !== null) localStorage.setItem(target, typeof merged === 'string' ? merged : JSON.stringify(merged));
+                });
+                const saveRecoveryCopy = () => {
+                    try {
+                        const snapshot = {};
+                        const keys = new Set(Object.keys(aliases));
+                        for (let index = 0; index < localStorage.length; index++) {
+                            const key = localStorage.key(index);
+                            if (key && (key.includes('round5-live') || key.startsWith('smartLecture:round5'))) keys.add(key);
+                        }
+                        keys.forEach(key => {
+                            if (key === RECOVERY_KEY) return;
+                            const value = parse(localStorage.getItem(key));
+                            if (value !== null) snapshot[key] = value;
+                        });
+                        localStorage.setItem(RECOVERY_KEY, JSON.stringify(snapshot));
+                    } catch (_) {}
+                };
+                saveRecoveryCopy();
+                window.addEventListener('pagehide', saveRecoveryCopy);
+                document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveRecoveryCopy(); });
             } catch (_) {}
         })();
     </script>
@@ -1504,7 +1557,7 @@
         const APP_AVAILABILITY_TITLE = "📚 محاضرات الدفعة الخامسة";
         const APP_AVAILABILITY_COPY = "كل أسبوع جديد بيفتح تلقائيًا حسب تاريخ بداية رحلتك، وبيفضل متاح لك للمراجعة بعد كده.";
         const PROFILE_KEY = 'smarterStudentProfileV1:round5-live';
-        const APP_DATA_VERSION = 2;
+        const APP_DATA_VERSION = 3;
         const getTodayIso = () => new Date().toISOString().slice(0, 10);
         const parseDateSafe = (value) => {
             const date = value ? new Date(`${value}T12:00:00`) : new Date();
@@ -1523,14 +1576,14 @@
 
         const getAllLectureCount = (maxWeek = COURSE_WEEK_COUNT - 1) => lecturesData.slice(0, maxWeek + 1).reduce((sum, week) => sum + (week.lectures?.length || 0), 0);
         const getProgressSnapshot = (maxWeek = COURSE_WEEK_COUNT - 1) => {
-            const lectureStatus = safeJsonParse(localStorage.getItem(LECTURE_COMPLETION_KEY), {});
-            const taskWorkspace = safeJsonParse(localStorage.getItem(TASK_WORKSPACE_KEY), {});
+            const lectureStatus = readLectureCompletion();
+            const taskWorkspace = readTaskWorkspace();
             let lectureTotal = 0, lectureDone = 0, taskTotal = 0, taskDone = 0;
             lecturesData.forEach((week, index) => {
                 if (index > maxWeek) return;
-                (week.lectures || []).forEach(lecture => {
+                (week.lectures || []).forEach((lecture, lectureIndex) => {
                     lectureTotal += 1;
-                    if (lectureStatus[`${week.title}-${lecture.title}`]) lectureDone += 1;
+                    if (lectureStatus[getLectureCompletionKey(index, lecture, lectureIndex)]) lectureDone += 1;
                 });
             });
             getTasksDataWithCustom().forEach((week, index) => {
@@ -1545,11 +1598,11 @@
             return { lectureTotal, lectureDone, taskTotal, taskDone };
         };
         const getRecommendedWeekIndex = () => {
-            const lectureStatus = safeJsonParse(localStorage.getItem(LECTURE_COMPLETION_KEY), {});
-            const taskWorkspace = safeJsonParse(localStorage.getItem(TASK_WORKSPACE_KEY), {});
+            const lectureStatus = readLectureCompletion();
+            const taskWorkspace = readTaskWorkspace();
             for (let index = 0; index < lecturesData.length; index++) {
                 const week = lecturesData[index];
-                const lectureIncomplete = (week.lectures || []).some(lecture => !lectureStatus[`${week.title}-${lecture.title}`]);
+                const lectureIncomplete = (week.lectures || []).some((lecture, lectureIndex) => !lectureStatus[getLectureCompletionKey(index, lecture, lectureIndex)]);
                 const taskWeek = getTasksDataWithCustom()[index];
                 const taskIncomplete = (taskWeek?.tasks || []).some((task, taskIndex) => taskWorkspace[getTaskWorkspaceId(index, task, taskIndex)]?.status !== 'completed');
                 if (lectureIncomplete || taskIncomplete) return index;
@@ -2111,12 +2164,32 @@
                 ]
             },
             {
-                title: "الأسبوع الثاني: التعلم والبحث الذكي",
-                summary: "الأسبوع ده هتتعلم إزاي تستخدم الذكاء الاصطناعي في التعلم والبحث، وتوصل لمعلومات موثوقة، وتتابع الموضوعات اللي تهمك بسهولة.",
-                icon: "search",
+                title: "الأسبوع الثاني: التعلم وبناء مساعديك",
+                summary: "الأسبوع ده هتتعلم إزاي تبني مساحة منظمة لمصادرك، وتحول المهام المتكررة في دراستك أو شغلك إلى مساعدين شخصيين تقدر تستخدمهم فعلًا.",
+                icon: "bot",
                 lectures: [
-                    { id: "lecture-03", title: "المحاضرة 3: التعلم ومساحات تعلمك الذكية", summary: "هنتعلم إزاي نخلي الذكاء الاصطناعي يساعدنا في الشرح والتلخيص والمراجعة، وإزاي نبني مساحة تعلم خاصة بينا على NotebookLM من ملفاتنا ومصادرنا." },
-                    { id: "lecture-04", title: "المحاضرة 4: البحث والمهام المجدولة", summary: "هتتعلم تختار نوع البحث المناسب، توصل لمصادر موثوقة وتتأكد منها، وكمان تعمل مهمة تتابع ليك الأخبار أو الأبحاث أو الفرص اللي تهمك." }
+                    {
+                        id: "lecture-03",
+                        title: "المحاضرة 3: التعلم وبناء مساعدك الشخصي",
+                        summary: "هنكمل بناء مساحات التعلم المنظمة، وبعدها هنتعلم إزاي نحوّل مهمة متكررة لمساعد شخصي بتعليمات واضحة ومراجع مناسبة، ونختبره ونطوره على استخدام حقيقي.",
+                        sourceType: "youtube",
+                        youtubeId: "Od66Y-S_8FA",
+                        sourceUrl: "https://youtu.be/Od66Y-S_8FA?si=fI69NSYxT2ISvvl4",
+                        attachments: [
+                            {
+                                title: "شرح الجزء الأول",
+                                url: "https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Week-2-Lecture-1-P1/",
+                                description: "تنظيم مصادر التعلم وبناء مساحة تقدر ترجع لها وتستخدمها فعلًا.",
+                                icon: "notebook-tabs"
+                            },
+                            {
+                                title: "شرح الجزء الثاني",
+                                url: "https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Week-2-Lecture-1-P2/",
+                                description: "بناء المساعدين الشخصيين والمهارات، وكتابة Instructions قابلة للاختبار والتطوير.",
+                                icon: "bot"
+                            }
+                        ]
+                    }
                 ]
             },
             {
@@ -2706,19 +2779,30 @@
         };
 
         const LECTURE_COMPLETION_KEY = 'lectureCompletionStatus:round5-live';
+        const getLectureCompletionKey = (weekIndex, lecture, lectureIndex = 0) => `${APP_STORAGE_NAMESPACE}:lecture:${lecture?.id || `w${weekIndex + 1}-l${lectureIndex + 1}`}`;
+        const readLectureCompletion = () => {
+            const saved = safeJsonParse(localStorage.getItem(LECTURE_COMPLETION_KEY), {});
+            const normalized = saved && typeof saved === 'object' && !Array.isArray(saved) ? { ...saved } : {};
+            let changed = false;
+            lecturesData.forEach((week, weekIndex) => (week.lectures || []).forEach((lecture, lectureIndex) => {
+                const canonicalKey = getLectureCompletionKey(weekIndex, lecture, lectureIndex);
+                const legacyKeys = [`${week.title}-${lecture.title}`, lecture.id].filter(Boolean);
+                if (normalized[canonicalKey] === undefined) {
+                    const legacyKey = legacyKeys.find(key => normalized[key] !== undefined);
+                    if (legacyKey) {
+                        normalized[canonicalKey] = !!normalized[legacyKey];
+                        changed = true;
+                    }
+                }
+            }));
+            if (changed) localStorage.setItem(LECTURE_COMPLETION_KEY, JSON.stringify(normalized));
+            return normalized;
+        };
         const LecturesTab = ({ setModalMessage, onOpenTaskWeek, onFloatLecture, currentWeekIndex, focusWeekIndex, onCelebrate }) => {
             const CURRENT_WEEK_INDEX = currentWeekIndex
             const DEFAULT_OPEN_WEEK_INDEX = APP_MODE === 'live' ? CURRENT_WEEK_INDEX : getRecommendedWeekIndex();
             const [openWeek, setOpenWeek] = useState(lecturesData[DEFAULT_OPEN_WEEK_INDEX]?.title || null);
-            const [completedLectures, setCompletedLectures] = useState(() => {
-                try {
-                    const saved = localStorage.getItem(LECTURE_COMPLETION_KEY);
-                    return saved ? JSON.parse(saved) : {};
-                } catch (error) {
-                    console.error("Failed to parse lecture completion status from localStorage", error);
-                    return {};
-                }
-            });
+            const [completedLectures, setCompletedLectures] = useState(readLectureCompletion);
 
 
             useEffect(() => {
@@ -2750,8 +2834,8 @@
             lecturesData.forEach((week, index) => {
                 if (index <= CURRENT_WEEK_INDEX && week.lectures) {
                     total += week.lectures.length;
-                    week.lectures.forEach(lecture => {
-                        if (completedLectures[`${week.title}-${lecture.title}`]) {
+                    week.lectures.forEach((lecture, lectureIndex) => {
+                        if (completedLectures[getLectureCompletionKey(index, lecture, lectureIndex)]) {
                             completed++;
                         }
                     });
@@ -2796,7 +2880,7 @@
                         {lecturesData.map((week, index) => {
                             const isLocked = index > CURRENT_WEEK_INDEX;
                             const totalLectures = week.lectures?.length || 0;
-                            const completedCount = week.lectures?.filter(l => completedLectures[`${week.title}-${l.title}`]).length || 0;
+                            const completedCount = week.lectures?.filter((lecture, lectureIndex) => completedLectures[getLectureCompletionKey(index, lecture, lectureIndex)]).length || 0;
                             const progress = totalLectures > 0 ? Math.round((completedCount / totalLectures) * 100) : 0;
 
                             return (
@@ -2847,7 +2931,7 @@
                                                         {week.lectures && week.lectures.length > 0 ? (
                                                             <ul className="space-y-6 mt-4 text-gray-800 dark:text-gray-200">
                                                                 {week.lectures.map((lecture, lectureIndex) => {
-                                                                    const lectureKey = `${week.title}-${lecture.title}`;
+                                                                    const lectureKey = getLectureCompletionKey(index, lecture, lectureIndex);
                                                                     const isCompleted = !!completedLectures[lectureKey];
                                                                     const mappedAttachments = lecture.attachments || ((week.guides || []).length === (week.lectures || []).length ? [week.guides[lectureIndex]].filter(Boolean) : (lectureIndex === 0 ? (week.guides || []) : []));
                                                                     return (
@@ -3128,26 +3212,30 @@
                 note: "تاسكات الأسبوع الأول بقوا 2: طبّق كل محاضرة على حاجة حقيقية وشارك المخرج النهائي."
             },
             {
-                title: "تاسكات الأسبوع الثاني: التعلم والبحث الذكي",
+                title: "تاسكات الأسبوع الثاني: التعلم وبناء مساعديك",
                 deadline: "",
                 tasks: [
                     {
                         id: "task-lecture-03",
                         lectureId: "lecture-03",
                         required: true,
-                        text: "ابنِ مساحة تعلم ذكية في NotebookLM",
-                        brief: "اختار موضوعًا تتعلمه فعلًا، أضف له مصادر مناسبة، ثم شارك مخرجًا واحدًا مفيدًا من مساحة التعلم.",
-                        ideas: ["استخدم كتابًا أو محاضرة أو فيديو أو ملفات موثوقة.", "نظّم المصادر داخل NotebookLM.", "شارك ملخصًا أو Quiz أو Flashcards أو Mind Map أو Audio Overview."]
-                    },
-                    {
-                        id: "task-lecture-04",
-                        lectureId: "lecture-04",
-                        required: true,
-                        text: "أنجز بحثًا موثقًا في موضوع يهمك",
-                        brief: "اختار سؤالًا حقيقيًا، ابحث عنه من مصادر موثوقة، وشارك النتيجة في صورة تقرير أو جدول أو مخرج عملي مناسب.",
-                        ideas: ["حدد سؤال البحث والمخرج المطلوب قبل البداية.", "راجع المصادر وتأكد إنها تدعم المعلومات.", "حوّل النتيجة لشكل تقدر تستخدمه أو ترجع له."]
+                        text: "ابنِ مساعدًا شخصيًا تستخدمه فعلًا",
+                        brief: "اعمل مساعدًا شخصيًا واحدًا على الأقل لمهمة حقيقية بتكررها في دراستك أو شغلك، واختبره وطوّره بناءً على النتيجة.",
+                        ideas: [
+                            "اختار مهمة متكررة وواضحة.",
+                            "اكتب في جملة واحدة: المساعد ده هيساعد مين يعمل إيه؟",
+                            "جرّب المهمة في Chat عادية لو لسه مش عارف النتيجة المثالية.",
+                            "جهز Instructions واضحة فيها الدور، المدخلات، الـWorkflow، الأسلوب، والحدود.",
+                            "أضف Reference واحدًا على الأقل لو عندك مثال مناسب.",
+                            "ابنِ الـGem أو المساعد على المنصة اللي تستخدمها.",
+                            "اختبره على حالة حقيقية.",
+                            "اعمل تعديلًا واحدًا على الأقل بناءً على النتيجة.",
+                            "شارك المساعد أو Screenshot منه حسب ما تسمح به بياناتك.",
+                            "اكتب سطرين: عملته إزاي؟ وفّر عليك إيه أو إيه اللي محتاج يتحسن؟"
+                        ]
                     }
-                ]
+                ],
+                note: "المطلوب مساعد واحد على الأقل لمهمة حقيقية؛ المهم تختبره وتعدّل عليه، مش مجرد تكتب Instructions وخلاص."
             },
             {
                 title: "تاسكات الأسبوع الثالث: المحتوى والتواصل البصري",
@@ -3455,20 +3543,34 @@
         const getTaskStorageKey = (weekTitle, taskObj) => {
             const text = typeof taskObj === 'string' ? taskObj : taskObj.text;
             const scopedId = typeof taskObj === 'object' ? (taskObj.id || taskObj.lectureId || '') : '';
-            return scopedId ? `${weekTitle}-${scopedId}-${text}` : `${weekTitle}-${text}`;
+            return scopedId ? `${APP_STORAGE_NAMESPACE}:task:${scopedId}` : `${weekTitle}-${text}`;
         };
         const getTaskWorkspaceId = (weekIndex, taskObj, taskIndex = 0) => {
             const scoped = typeof taskObj === 'object' ? (taskObj.id || taskObj.lectureId || '') : '';
-            const title = typeof taskObj === 'string' ? taskObj : taskObj.text;
-            const compact = String(title || '').replace(/\s+/g, ' ').trim().slice(0, 90);
-            return `${APP_STORAGE_NAMESPACE}:w${weekIndex + 1}:${scoped || taskIndex}:${compact}`;
+            return `${APP_STORAGE_NAMESPACE}:w${weekIndex + 1}:${scoped || `task-${taskIndex + 1}`}`;
         };
         const getTaskShortTitle = (taskObj, index) => {
             const text = typeof taskObj === 'string' ? taskObj : taskObj.text;
             const cleaned = String(text || '').replace(/^\s*\d+[.)-]?\s*/, '').replace(/[📽️📊🎨🧭📝💡🚀]+/g, '').trim();
             return cleaned.length > 78 ? `${cleaned.slice(0, 75)}…` : (cleaned || `تاسك ${index + 1}`);
         };
-        const readTaskWorkspace = () => safeJsonParse(localStorage.getItem(TASK_WORKSPACE_KEY), {});
+        const readTaskWorkspace = () => {
+            const saved = safeJsonParse(localStorage.getItem(TASK_WORKSPACE_KEY), {});
+            const normalized = saved && typeof saved === 'object' && !Array.isArray(saved) ? { ...saved } : {};
+            let changed = false;
+            tasksData.forEach((week, weekIndex) => (week.tasks || []).forEach((task, taskIndex) => {
+                const canonicalId = getTaskWorkspaceId(weekIndex, task, taskIndex);
+                if (normalized[canonicalId]) return;
+                const scoped = typeof task === 'object' ? (task.id || task.lectureId || '') : '';
+                const oldMarker = `:w${weekIndex + 1}:${scoped || taskIndex}:`;
+                const legacyId = Object.keys(normalized).find(key => key.startsWith(`${canonicalId}:`) || key.includes(oldMarker));
+                if (!legacyId) return;
+                normalized[canonicalId] = { ...normalized[legacyId], id: canonicalId };
+                changed = true;
+            }));
+            if (changed) localStorage.setItem(TASK_WORKSPACE_KEY, JSON.stringify(normalized));
+            return normalized;
+        };
         const writeTaskWorkspace = (records) => {
             localStorage.setItem(TASK_WORKSPACE_KEY, JSON.stringify(records));
             dispatchSmarterEvent('smarter-task-workspace-updated');
@@ -5707,20 +5809,20 @@
                             <Icon name="play-circle" className="w-9 h-9" />
                         </span>
                         <p className="text-[--accent-green] font-bold mb-2">نزلت دلوقتي 🎉</p>
-                        <h2 className="text-2xl sm:text-3xl font-bold leading-relaxed">المحاضرة الثانية متاحة</h2>
-                        <p className="text-white/75 mt-2 font-bold">تنظيم المحادثات والتعلم في عصر الذكاء الاصطناعي</p>
-                        <p className="text-white/85 mt-3 leading-relaxed">الحق اسمعها واعمل التاسك بتاعها، عشان ممكن تكسب اشتراك Google Pro أو Canva Pro.</p>
+                        <h2 className="text-2xl sm:text-3xl font-bold leading-relaxed">أول محاضرة من الأسبوع الثاني متاحة</h2>
+                        <p className="text-white/75 mt-2 font-bold">التعلم وبناء مساعدك الشخصي</p>
+                        <p className="text-white/85 mt-3 leading-relaxed">اسمع المحاضرة، راجع الكتيبين، وبعدها ابنِ مساعدًا شخصيًا لمهمة حقيقية بتكررها.</p>
                     </div>
                     <div className="p-5 sm:p-6 space-y-3">
                         <button type="button" onClick={onPlay} className="btn-brand-primary w-full py-3.5 px-5 rounded-xl font-bold inline-flex items-center justify-center gap-2">
                             <Icon name="play" className="w-5 h-5 fill-current" /> شغّل المحاضرة داخل التطبيق
                         </button>
                         <div className="grid sm:grid-cols-2 gap-3">
-                            <a href="https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Week-1-Lecture-2-p1/" target="_blank" rel="noopener noreferrer" className="share-card-button rounded-xl py-3 px-4 font-bold inline-flex items-center justify-center gap-2">
-                                <Icon name="folder-kanban" className="w-5 h-5" /> شرح الجزء الأول
+                            <a href="https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Week-2-Lecture-1-P1/" target="_blank" rel="noopener noreferrer" className="share-card-button rounded-xl py-3 px-4 font-bold inline-flex items-center justify-center gap-2">
+                                <Icon name="notebook-tabs" className="w-5 h-5" /> شرح الجزء الأول
                             </a>
-                            <a href="https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Week-1-Lecture-2-p2/" target="_blank" rel="noopener noreferrer" className="share-card-button rounded-xl py-3 px-4 font-bold inline-flex items-center justify-center gap-2">
-                                <Icon name="notebook-tabs" className="w-5 h-5" /> شرح الجزء الثاني
+                            <a href="https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Week-2-Lecture-1-P2/" target="_blank" rel="noopener noreferrer" className="share-card-button rounded-xl py-3 px-4 font-bold inline-flex items-center justify-center gap-2">
+                                <Icon name="bot" className="w-5 h-5" /> شرح الجزء الثاني
                             </a>
                         </div>
                         <button type="button" onClick={onClose} className="w-full text-sm font-bold text-gray-500 dark:text-gray-300 py-2">هشوفها بعدين</button>
@@ -5811,7 +5913,7 @@
             const [profile, setProfile] = useState(() => safeJsonParse(localStorage.getItem(PROFILE_KEY), null));
             const [isEditingProfile, setIsEditingProfile] = useState(false);
             const [achievement, setAchievement] = useState(null);
-            const [showLectureRelease, setShowLectureRelease] = useState(() => sessionStorage.getItem('round5Lecture2ReleaseSeen') !== '1');
+            const [showLectureRelease, setShowLectureRelease] = useState(() => sessionStorage.getItem('round5Lecture3ReleaseSeen') !== '1');
             const currentWeekIndex = getCurrentWeekIndex(profile);
 
             useEffect(() => { const storedTheme = localStorage.getItem('theme'); const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; setTheme(storedTheme === 'dark' || (!storedTheme && prefersDark) ? 'dark' : 'light'); }, []);
@@ -5837,15 +5939,15 @@
             const handleOpenExactTask = useCallback((weekIndex, taskId) => { setTaskFocusIndex(weekIndex); setTaskFocusId(taskId); setActiveTab('tasks'); window.setTimeout(() => document.getElementById(`task-item-${encodeURIComponent(taskId)}`)?.scrollIntoView({ behavior:'smooth', block:'center' }), 260); }, []);
             const handleFloatLecture = useCallback(({ weekTitle, lecture }) => setFloatingLecture({ weekTitle, lecture }), []);
             const closeLectureRelease = useCallback(() => {
-                sessionStorage.setItem('round5Lecture2ReleaseSeen', '1');
+                sessionStorage.setItem('round5Lecture3ReleaseSeen', '1');
                 setShowLectureRelease(false);
             }, []);
             const playReleasedLecture = useCallback(() => {
-                const week = lecturesData[0];
-                const lecture = week?.lectures?.find(item => item.id === 'lecture-02') || week?.lectures?.[1];
+                const week = lecturesData[1];
+                const lecture = week?.lectures?.find(item => item.id === 'lecture-03') || week?.lectures?.[0];
                 if (lecture) {
                     setActiveTab('lectures');
-                    setLectureFocusIndex(0);
+                    setLectureFocusIndex(1);
                     setFloatingLecture({ weekTitle: week.title, lecture });
                 }
                 closeLectureRelease();
