@@ -1557,7 +1557,7 @@
         const APP_AVAILABILITY_TITLE = "📚 محاضرات الدفعة الخامسة";
         const APP_AVAILABILITY_COPY = "كل أسبوع جديد بيفتح تلقائيًا حسب تاريخ بداية رحلتك، وبيفضل متاح لك للمراجعة بعد كده.";
         const PROFILE_KEY = 'smarterStudentProfileV1:round5-live';
-        const APP_DATA_VERSION = 3;
+        const APP_DATA_VERSION = 4;
         const getTodayIso = () => new Date().toISOString().slice(0, 10);
         const parseDateSafe = (value) => {
             const date = value ? new Date(`${value}T12:00:00`) : new Date();
@@ -2186,6 +2186,28 @@
                                 title: "شرح الجزء الثاني",
                                 url: "https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Week-2-Lecture-1-P2/",
                                 description: "بناء المساعدين الشخصيين والمهارات، وكتابة Instructions قابلة للاختبار والتطوير.",
+                                icon: "bot"
+                            }
+                        ]
+                    },
+                    {
+                        id: "lecture-04",
+                        title: "المحاضرة 4: بناء مهاراتك الخاصة ووكلاء الذكاء الاصطناعي",
+                        summary: "هنتعلم الفرق بين المساعد والمهارة والوكيل، وإمتى تحتاج كل واحد فيهم، وإزاي تبني مهارة قابلة لإعادة الاستخدام تساعدك في شغلك بدل ما تبدأ من الصفر كل مرة.",
+                        sourceType: "youtube",
+                        youtubeId: "P9CcQvM0VPM",
+                        sourceUrl: "https://youtu.be/P9CcQvM0VPM?si=fiG7OinJvrnPvSkO",
+                        attachments: [
+                            {
+                                title: "شرح الجزء الأول",
+                                url: "https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Week-2-Lecture-2-P1/",
+                                description: "شرح عملي لفكرة المهارات، وإمتى تبني مهارة خاصة بيك، مع أمثلة تقدر تبدأ منها.",
+                                icon: "sparkles"
+                            },
+                            {
+                                title: "شرح الجزء الثاني",
+                                url: "https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Week-2-Lecture-2-P2/",
+                                description: "شرح مبسط لوكلاء الذكاء الاصطناعي، واستخداماتهم والفرق بينهم وبين المساعدين والمهارات.",
                                 icon: "bot"
                             }
                         ]
@@ -4977,6 +4999,32 @@
                             <AssistantsLibrary />
                         </Accordion>
 
+                        <Accordion
+                            title="مهارات الدبلومة (Smarter Skills)"
+                            isOpen={openAccordion === "smarter_skills"}
+                            onToggle={() => handleToggle("smarter_skills")}
+                        >
+                            <HeroToolCard
+                                title="مهارة بناء البريزنتيشن الخاصة بيك"
+                                icon="presentation"
+                                description="مهارة تفاعلية تساعدك تبني تعليمات بريزنتيشن مناسبة لشغلك وهويتك وطريقتك، حتى لو مش بتعمل عروض تقديمية كتير."
+                                featuresTitle="هتستخدمها إزاي؟"
+                                features={[
+                                    "افتح ملف المهارة وابدأ استخدامه",
+                                    "هتسألك شوية أسئلة عن شغلك وجمهورك وأسلوبك",
+                                    "جاوب سؤال بسؤال لحد ما تبني مهارتك الشخصية",
+                                    "بعدها استخدم المهارة كل مرة تحتاج تعمل بريزنتيشن"
+                                ]}
+                                linkUrl="https://drive.google.com/file/d/1vZ3rAlD7qF58xjKgxK7O9lFPgQxXV5pW/view?usp=sharing"
+                                linkLabel="فتح مهارة البريزنتيشن"
+                            />
+                            <div className="notice-surface p-4 mt-4 rounded-lg border border-[--accent-green]/30">
+                                <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-200">
+                                    <strong className="text-[--accent-green]">مهم:</strong> أول ما تستخدم المهارة، هتفضل تسألك وتجاوبها لحد ما توصل لنسخة معمولة مخصوص ليك. مش مطلوب تجهز كل التفاصيل من البداية.
+                                </p>
+                            </div>
+                        </Accordion>
+
                         {/* Workflows Accordion (الدليل العملي لمسارات الذكاء الاصطناعي) */}
                         <Accordion 
                             title="مسارات Workflows (الدليل المفصل)" 
@@ -5107,6 +5155,75 @@
             );
         };
 
+        const DataBackupPanel = () => {
+            const fileInputRef = useRef(null);
+            const [message, setMessage] = useState('');
+            const isCourseKey = key => key === 'theme' || key === 'smarterWithAI:round5:persistent-backup' || key.includes('round5-live') || key.startsWith('smartLecture:round5');
+            const collectData = () => {
+                const data = {};
+                for (let index = 0; index < localStorage.length; index++) {
+                    const key = localStorage.key(index);
+                    if (key && isCourseKey(key)) data[key] = localStorage.getItem(key);
+                }
+                return data;
+            };
+            const exportBackup = () => {
+                const payload = {
+                    app: 'Smarter With AI - Round 5',
+                    formatVersion: 1,
+                    createdAt: new Date().toISOString(),
+                    data: collectData()
+                };
+                const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `smarter-with-ai-backup-${new Date().toISOString().slice(0,10)}.json`;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(url);
+                setMessage('النسخة الاحتياطية اتنزّلت. احتفظ بيها عشان تقدر ترجع تقدمك في أي وقت.');
+            };
+            const importBackup = event => {
+                const file = event.target.files?.[0];
+                event.target.value = '';
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                    try {
+                        const payload = JSON.parse(String(reader.result || ''));
+                        if (payload?.app !== 'Smarter With AI - Round 5' || !payload.data || typeof payload.data !== 'object') throw new Error('invalid');
+                        if (!confirm('استرجاع النسخة هيحدّث بيانات الدبلومة الموجودة على الجهاز. نكمّل؟')) return;
+                        Object.entries(payload.data).forEach(([key, value]) => {
+                            if (isCourseKey(key) && typeof value === 'string') localStorage.setItem(key, value);
+                        });
+                        setMessage('تم استرجاع تقدمك. التطبيق هيعيد التحميل دلوقتي.');
+                        window.setTimeout(() => window.location.reload(), 700);
+                    } catch (error) {
+                        setMessage('الملف ده مش نسخة احتياطية صحيحة لتطبيق الدبلومة.');
+                    }
+                };
+                reader.onerror = () => setMessage('مقدرناش نقرأ الملف. جرّب نسخة احتياطية تانية.');
+                reader.readAsText(file);
+            };
+            return <section className="space-section space-y-4">
+                <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+                    <span className="personal-space-icon"><Icon name="shield-check" className="w-6 h-6" /></span>
+                    <div className="flex-grow">
+                        <h3 className="space-section-heading">حفظ واسترجاع تقدمك</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">تقدمك محفوظ تلقائيًا بنفس مفاتيح الدفعة حتى بعد تحديث التطبيق. ولأمان إضافي نزّل نسخة على جهازك من وقت للتاني.</p>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                        <button type="button" onClick={exportBackup} className="btn-brand-primary px-4 py-3 rounded-lg font-bold inline-flex items-center justify-center gap-2"><Icon name="download" className="w-4 h-4" /> تنزيل نسخة احتياطية</button>
+                        <button type="button" onClick={() => fileInputRef.current?.click()} className="share-card-button px-4 py-3 rounded-lg font-bold inline-flex items-center justify-center gap-2"><Icon name="upload" className="w-4 h-4" /> استرجاع نسخة</button>
+                        <input ref={fileInputRef} type="file" accept="application/json,.json" onChange={importBackup} className="hidden" />
+                    </div>
+                </div>
+                {message && <p className="text-sm font-bold text-[--accent-green]">{message}</p>}
+            </section>;
+        };
+
         // MoreTab Component
         const MoreTab = () => {
             const [openAccordion, setOpenAccordion] = useState(null);
@@ -5125,6 +5242,8 @@
                     <Reminder>
                         رسالة شكر: رحلتنا معكم ممتعة، وبكم نكبر ونتطور. رأيك يساهم في تحسين الدبلومة، ودعوتك لأصدقائك توسّع مجتمعنا. هدفنا أن نصبح جميعًا Smarter With AI.
                     </Reminder>
+
+                    <DataBackupPanel />
                     
                     <div className="space-y-4">
                         <Accordion 
@@ -5809,19 +5928,19 @@
                             <Icon name="play-circle" className="w-9 h-9" />
                         </span>
                         <p className="text-[--accent-green] font-bold mb-2">نزلت دلوقتي 🎉</p>
-                        <h2 className="text-2xl sm:text-3xl font-bold leading-relaxed">أول محاضرة من الأسبوع الثاني متاحة</h2>
-                        <p className="text-white/75 mt-2 font-bold">التعلم وبناء مساعدك الشخصي</p>
-                        <p className="text-white/85 mt-3 leading-relaxed">اسمع المحاضرة، راجع الكتيبين، وبعدها ابنِ مساعدًا شخصيًا لمهمة حقيقية بتكررها.</p>
+                        <h2 className="text-2xl sm:text-3xl font-bold leading-relaxed">المحاضرة الثانية من الأسبوع الثاني متاحة</h2>
+                        <p className="text-white/75 mt-2 font-bold">المهارات ووكلاء الذكاء الاصطناعي</p>
+                        <p className="text-white/85 mt-3 leading-relaxed">اسمع المحاضرة، راجع الكتيبين، وبعدها جرّب مهارة البريزنتيشن وابنِ نسختك الخاصة خطوة بخطوة.</p>
                     </div>
                     <div className="p-5 sm:p-6 space-y-3">
                         <button type="button" onClick={onPlay} className="btn-brand-primary w-full py-3.5 px-5 rounded-xl font-bold inline-flex items-center justify-center gap-2">
                             <Icon name="play" className="w-5 h-5 fill-current" /> شغّل المحاضرة داخل التطبيق
                         </button>
                         <div className="grid sm:grid-cols-2 gap-3">
-                            <a href="https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Week-2-Lecture-1-P1/" target="_blank" rel="noopener noreferrer" className="share-card-button rounded-xl py-3 px-4 font-bold inline-flex items-center justify-center gap-2">
-                                <Icon name="notebook-tabs" className="w-5 h-5" /> شرح الجزء الأول
+                            <a href="https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Week-2-Lecture-2-P1/" target="_blank" rel="noopener noreferrer" className="share-card-button rounded-xl py-3 px-4 font-bold inline-flex items-center justify-center gap-2">
+                                <Icon name="sparkles" className="w-5 h-5" /> شرح الجزء الأول
                             </a>
-                            <a href="https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Week-2-Lecture-1-P2/" target="_blank" rel="noopener noreferrer" className="share-card-button rounded-xl py-3 px-4 font-bold inline-flex items-center justify-center gap-2">
+                            <a href="https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Week-2-Lecture-2-P2/" target="_blank" rel="noopener noreferrer" className="share-card-button rounded-xl py-3 px-4 font-bold inline-flex items-center justify-center gap-2">
                                 <Icon name="bot" className="w-5 h-5" /> شرح الجزء الثاني
                             </a>
                         </div>
@@ -5913,7 +6032,7 @@
             const [profile, setProfile] = useState(() => safeJsonParse(localStorage.getItem(PROFILE_KEY), null));
             const [isEditingProfile, setIsEditingProfile] = useState(false);
             const [achievement, setAchievement] = useState(null);
-            const [showLectureRelease, setShowLectureRelease] = useState(() => sessionStorage.getItem('round5Lecture3ReleaseSeen') !== '1');
+            const [showLectureRelease, setShowLectureRelease] = useState(() => sessionStorage.getItem('round5Lecture4ReleaseSeen') !== '1');
             const currentWeekIndex = getCurrentWeekIndex(profile);
 
             useEffect(() => { const storedTheme = localStorage.getItem('theme'); const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; setTheme(storedTheme === 'dark' || (!storedTheme && prefersDark) ? 'dark' : 'light'); }, []);
@@ -5939,12 +6058,12 @@
             const handleOpenExactTask = useCallback((weekIndex, taskId) => { setTaskFocusIndex(weekIndex); setTaskFocusId(taskId); setActiveTab('tasks'); window.setTimeout(() => document.getElementById(`task-item-${encodeURIComponent(taskId)}`)?.scrollIntoView({ behavior:'smooth', block:'center' }), 260); }, []);
             const handleFloatLecture = useCallback(({ weekTitle, lecture }) => setFloatingLecture({ weekTitle, lecture }), []);
             const closeLectureRelease = useCallback(() => {
-                sessionStorage.setItem('round5Lecture3ReleaseSeen', '1');
+                sessionStorage.setItem('round5Lecture4ReleaseSeen', '1');
                 setShowLectureRelease(false);
             }, []);
             const playReleasedLecture = useCallback(() => {
                 const week = lecturesData[1];
-                const lecture = week?.lectures?.find(item => item.id === 'lecture-03') || week?.lectures?.[0];
+                const lecture = week?.lectures?.find(item => item.id === 'lecture-04') || week?.lectures?.[week.lectures.length - 1];
                 if (lecture) {
                     setActiveTab('lectures');
                     setLectureFocusIndex(1);
