@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Smarter With AI - الدفعة الخامسة</title>
     <meta name="theme-color" content="#1e2d44">
     <meta name="mobile-web-app-capable" content="yes">
@@ -1557,7 +1560,7 @@
         const APP_AVAILABILITY_TITLE = "📚 محاضرات الدفعة الخامسة";
         const APP_AVAILABILITY_COPY = "كل أسبوع جديد بيفتح تلقائيًا حسب تاريخ بداية رحلتك، وبيفضل متاح لك للمراجعة بعد كده.";
         const PROFILE_KEY = 'smarterStudentProfileV1:round5-live';
-        const APP_DATA_VERSION = 4;
+        const APP_DATA_VERSION = 5;
         const getTodayIso = () => new Date().toISOString().slice(0, 10);
         const parseDateSafe = (value) => {
             const date = value ? new Date(`${value}T12:00:00`) : new Date();
@@ -3255,9 +3258,24 @@
                             "شارك المساعد أو Screenshot منه حسب ما تسمح به بياناتك.",
                             "اكتب سطرين: عملته إزاي؟ وفّر عليك إيه أو إيه اللي محتاج يتحسن؟"
                         ]
+                    },
+                    {
+                        id: "task-lecture-04",
+                        lectureId: "lecture-04",
+                        required: true,
+                        text: "اعمل بريزنتيشن عن موضوع حقيقي من شغلك",
+                        brief: "اختار موضوعًا حقيقيًا واعمل له بريزنتيشن كاملة. تقدر تبدأ من غير Reference عادي، بس وضّح للأداة قدر الإمكان المحتوى والجمهور والشكل اللي إنت عاوزه.",
+                        ideas: [
+                            "اختار موضوعًا حقيقيًا محتاج تعمل عنه بريزنتيشن.",
+                            "اكتب المحتوى أو الفكرة الأساسية، وحدد الجمهور والهدف وعدد الشرائح والستايل اللي يناسبك.",
+                            "تقدر تبدأ من غير Reference، أو تستخدم Template من Canva أو Envato أو مكتبة الأداة لو لقيت حاجة مناسبة.",
+                            "راجع أول نتيجة وعدّل عليها؛ غيّر شريحة واحدة على الأقل بدل ما تعتمد أول Output زي ما هو.",
+                            "شارك البريزنتيشن النهائية، واكتب باختصار إيه اللي عدّلته. ولو استخدمت Reference أو Template شارك اسمه أو رابطه.",
+                            "اختياري: لو بتعمل بريزنتيشنز كتير، استخدم مهارة البريزنتيشن المرفقة وابنِ Skill خاصة بيك، وبعدها جرّبها على موضوع حقيقي."
+                        ]
                     }
                 ],
-                note: "المطلوب مساعد واحد على الأقل لمهمة حقيقية؛ المهم تختبره وتعدّل عليه، مش مجرد تكتب Instructions وخلاص."
+                note: "الأسبوع الثاني فيه تاسكين: مساعد شخصي + بريزنتيشن. نفّذ تاسك كل محاضرة على حاجة حقيقية. مهارة البريزنتيشن اختيارية، ومفيدة أكتر لو البريزنتيشنز بتتكرر معاك."
             },
             {
                 title: "تاسكات الأسبوع الثالث: المحتوى والتواصل البصري",
