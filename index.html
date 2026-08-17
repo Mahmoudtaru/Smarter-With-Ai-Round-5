@@ -1560,7 +1560,7 @@
         const APP_AVAILABILITY_TITLE = "📚 محاضرات الدفعة الخامسة";
         const APP_AVAILABILITY_COPY = "كل أسبوع جديد بيفتح تلقائيًا حسب تاريخ بداية رحلتك، وبيفضل متاح لك للمراجعة بعد كده.";
         const PROFILE_KEY = 'smarterStudentProfileV1:round5-live';
-        const APP_DATA_VERSION = 6;
+        const APP_DATA_VERSION = 7;
         const getTodayIso = () => new Date().toISOString().slice(0, 10);
         const parseDateSafe = (value) => {
             const date = value ? new Date(`${value}T12:00:00`) : new Date();
@@ -1579,6 +1579,7 @@
 
         const isLectureReleased = lecture => !!(lecture && (lecture.youtubeId || lecture.fileId || lecture.previewUrl));
         const isTaskReleased = task => {
+            if (task?.released === false) return false;
             if (!task?.lectureId) return true;
             return lecturesData.some(week => (week.lectures || []).some(lecture => lecture.id === task.lectureId && isLectureReleased(lecture)));
         };
@@ -2250,7 +2251,23 @@
                 summary: "الأسبوع ده هتتعلم تحوّل أفكارك لمحتوى وعروض تقديمية، وتعمل صور وإنفوجرافيك يوصلوا فكرتك بشكل واضح وجذاب.",
                 icon: "presentation",
                 lectures: [
-                    { id: "lecture-05", title: "المحاضرة 5: كتابة المحتوى والعروض التقديمية", summary: "هتتعلم إزاي تكتب محتوى مناسب لهدفك وجمهورك، سواء بوست أو مقال أو إيميل أو سكريبت، وإزاي تحوّل فكرتك لعرض تقديمي احترافي." },
+                    {
+                        id: "lecture-05",
+                        title: "المحاضرة 5: إنشاء الصور وتعديلها بالذكاء الاصطناعي",
+                        summary: "هنتعلم إزاي نحوّل الفكرة لصورة واضحة بالستايل اللي يناسبنا، ونستخدم المراجع، ونعدّل الصور ونحسّن الجودة والإضاءة والتفاصيل ببرومبت واضح.",
+                        sourceType: "youtube",
+                        youtubeId: "vHFSD8AGyUE",
+                        sourceUrl: "https://youtu.be/vHFSD8AGyUE?si=Vu4C52d94uJzmREQ",
+                        hasTask: false,
+                        attachments: [
+                            {
+                                title: "شرح إنشاء الصور وتعديلها بالذكاء الاصطناعي",
+                                url: "https://mahmoudtaru.github.io/Smarter-with-Ai-Round-5-week-3-lecture-1/",
+                                description: "شرح عملي لإنشاء الصور وتعديلها وتحسينها، مع أمثلة وأفكار تقدر تستخدمها في شغلك ودراستك.",
+                                icon: "image"
+                            }
+                        ]
+                    },
                     { id: "lecture-06", title: "المحاضرة 6: توليد الصور والإنفوجرافيك", summary: "هنتعلم إزاي نعمل صور من وصف بسيط، ونعدّل صور موجودة، ونستخدم المراجع عشان نوصل للشكل اللي في دماغنا، ونحوّل المعلومات لإنفوجرافيك واضح." }
                 ]
             },
@@ -3316,6 +3333,7 @@
                     {
                         id: "task-lecture-05",
                         lectureId: "lecture-05",
+                        released: false,
                         required: true,
                         text: "حوّل فكرة حقيقية إلى محتوى جاهز للاستخدام",
                         brief: "اختار فكرة أو بحثًا يخصك، وحدد الجمهور والهدف والنبرة، ثم حوّله إلى بوست أو مقال أو إيميل أو سكريبت أو عرض تقديمي.",
@@ -5978,22 +5996,17 @@
                             <Icon name="play-circle" className="w-9 h-9" />
                         </span>
                         <p className="text-[--accent-green] font-bold mb-2">نزلت دلوقتي 🎉</p>
-                        <h2 className="text-2xl sm:text-3xl font-bold leading-relaxed">مراجعة الأسبوع الأول والثاني متاحة</h2>
-                        <p className="text-white/75 mt-2 font-bold">رتّب اللي اتعلمته وثبّت أهم الأفكار</p>
-                        <p className="text-white/85 mt-3 leading-relaxed">شغّل المراجعة، وبعدها افتح الجزأين عشان ترجع للشرح في أي وقت.</p>
+                        <h2 className="text-2xl sm:text-3xl font-bold leading-relaxed">المحاضرة الأولى من الأسبوع الثالث متاحة</h2>
+                        <p className="text-white/75 mt-2 font-bold">إنشاء الصور وتعديلها بالذكاء الاصطناعي</p>
+                        <p className="text-white/85 mt-3 leading-relaxed">شغّل المحاضرة داخل التطبيق، وبعدها افتح الشرح عشان تراجع الأمثلة وتطبّق براحتك.</p>
                     </div>
                     <div className="p-5 sm:p-6 space-y-3">
                         <button type="button" onClick={onPlay} className="btn-brand-primary w-full py-3.5 px-5 rounded-xl font-bold inline-flex items-center justify-center gap-2">
                             <Icon name="play" className="w-5 h-5 fill-current" /> شغّل المحاضرة داخل التطبيق
                         </button>
-                        <div className="grid sm:grid-cols-2 gap-3">
-                            <a href="https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Revision-1-P1/" target="_blank" rel="noopener noreferrer" className="share-card-button rounded-xl py-3 px-4 font-bold inline-flex items-center justify-center gap-2">
-                                <Icon name="book-open-text" className="w-5 h-5" /> الجزء الأول
-                            </a>
-                            <a href="https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Revision-1-P2/" target="_blank" rel="noopener noreferrer" className="share-card-button rounded-xl py-3 px-4 font-bold inline-flex items-center justify-center gap-2">
-                                <Icon name="book-check" className="w-5 h-5" /> الجزء الثاني
-                            </a>
-                        </div>
+                        <a href="https://mahmoudtaru.github.io/Smarter-with-Ai-Round-5-week-3-lecture-1/" target="_blank" rel="noopener noreferrer" className="share-card-button w-full rounded-xl py-3 px-4 font-bold inline-flex items-center justify-center gap-2">
+                            <Icon name="book-open-text" className="w-5 h-5" /> افتح شرح المحاضرة
+                        </a>
                         <button type="button" onClick={onClose} className="w-full text-sm font-bold text-gray-500 dark:text-gray-300 py-2">هشوفها بعدين</button>
                     </div>
                 </div>
@@ -6082,7 +6095,7 @@
             const [profile, setProfile] = useState(() => safeJsonParse(localStorage.getItem(PROFILE_KEY), null));
             const [isEditingProfile, setIsEditingProfile] = useState(false);
             const [achievement, setAchievement] = useState(null);
-            const [showLectureRelease, setShowLectureRelease] = useState(() => sessionStorage.getItem('round5Review1ReleaseSeen') !== '1');
+            const [showLectureRelease, setShowLectureRelease] = useState(() => sessionStorage.getItem('round5Lecture5ReleaseSeen') !== '1');
             const currentWeekIndex = getCurrentWeekIndex(profile);
 
             useEffect(() => { const storedTheme = localStorage.getItem('theme'); const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; setTheme(storedTheme === 'dark' || (!storedTheme && prefersDark) ? 'dark' : 'light'); }, []);
@@ -6108,15 +6121,15 @@
             const handleOpenExactTask = useCallback((weekIndex, taskId) => { setTaskFocusIndex(weekIndex); setTaskFocusId(taskId); setActiveTab('tasks'); window.setTimeout(() => document.getElementById(`task-item-${encodeURIComponent(taskId)}`)?.scrollIntoView({ behavior:'smooth', block:'center' }), 260); }, []);
             const handleFloatLecture = useCallback(({ weekTitle, lecture }) => setFloatingLecture({ weekTitle, lecture }), []);
             const closeLectureRelease = useCallback(() => {
-                sessionStorage.setItem('round5Review1ReleaseSeen', '1');
+                sessionStorage.setItem('round5Lecture5ReleaseSeen', '1');
                 setShowLectureRelease(false);
             }, []);
             const playReleasedLecture = useCallback(() => {
-                const week = lecturesData[1];
-                const lecture = week?.lectures?.find(item => item.id === 'review-01') || week?.lectures?.[week.lectures.length - 1];
+                const week = lecturesData[2];
+                const lecture = week?.lectures?.find(item => item.id === 'lecture-05') || week?.lectures?.[0];
                 if (lecture) {
                     setActiveTab('lectures');
-                    setLectureFocusIndex(1);
+                    setLectureFocusIndex(2);
                     setFloatingLecture({ weekTitle: week.title, lecture });
                 }
                 closeLectureRelease();
