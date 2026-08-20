@@ -1288,6 +1288,20 @@
                     if (currentValue !== null) merged = mergeValues(merged, currentValue);
                     if (merged !== null) localStorage.setItem(target, typeof merged === 'string' ? merged : JSON.stringify(merged));
                 });
+                const weekStructureMigrationKey = 'smarterWeekStructureV13Migrated:round5-live';
+                if (localStorage.getItem(weekStructureMigrationKey) !== '1') {
+                    const customTasksKey = 'smartCustomTasksV1:round5-live';
+                    const customTasks = parse(localStorage.getItem(customTasksKey));
+                    if (Array.isArray(customTasks)) {
+                        const shiftedTasks = customTasks.map(entry => {
+                            const linkedWeek = String(entry?.linkedWeek ?? entry?.weekIndex ?? 'none');
+                            if (linkedWeek !== '2') return entry;
+                            return { ...entry, linkedWeek:'3', weekIndex:entry.weekIndex === 2 ? 3 : entry.weekIndex, weekTitle:String(entry.weekTitle || '').replace('الأسبوع الثالث', 'الأسبوع الرابع') };
+                        });
+                        localStorage.setItem(customTasksKey, JSON.stringify(shiftedTasks));
+                    }
+                    localStorage.setItem(weekStructureMigrationKey, '1');
+                }
                 const saveRecoveryCopy = () => {
                     try {
                         const snapshot = {};
@@ -1542,8 +1556,8 @@
         const APP_EDITION_NAME = "الدفعة الخامسة";
         const APP_MODE = "live";
         const FORCE_LEARNING_MODE = "live";
-        const COURSE_WEEK_COUNT = 7;
-        const LAST_RELEASED_WEEK_INDEX = 2;
+        const COURSE_WEEK_COUNT = 8;
+        const LAST_RELEASED_WEEK_INDEX = 3;
         const APP_STORAGE_NAMESPACE = "round5-live";
         const OFFICIAL_COHORT_START_DATE = "2026-07-24";
         const ROUND5_WHATSAPP_COMMUNITY_URL = "https://chat.whatsapp.com/GctNSmIMdmb0gl9HtN2J5R";
@@ -1556,12 +1570,12 @@
         const APP_HOME_EYEBROW = "أهلًا بيك في الدفعة الخامسة… رحلتك الأذكى بدأت";
         const APP_STATION_LABEL = "خطوتك التالية";
         const APP_HOME_REMINDER = "ارجع للمحاضرات وقت ما تحتاج، راجع ملاحظاتك، وكمّل أي تطبيق أو مشروع لسه ما خلصتوش. قيمة الدبلومة الحقيقية بتكبر كل مرة تستخدم اللي اتعلمته.";
-        const APP_LECTURES_REMINDER = "محاضرات الدفعة الخامسة بتظهر لك حسب الأسبوع اللي وصلت له. شغّل المحاضرة، سجّل ملاحظاتك، وبعدها طبّق التاسك.";
+        const APP_LECTURES_REMINDER = "كل أسبوع موجود في قائمة مستقلة. افتح الأسبوع اللي عايزه، شغّل المحاضرة، وعلّم عليها لما تخلصها.";
         const APP_LOCKED_MESSAGE = "الأسبوع ده لسه ما نزلش؛ هيتفتح أول ما محاضراته وتاسكاته تكون متاحة.";
         const APP_AVAILABILITY_TITLE = "📚 محاضرات الدفعة الخامسة";
-        const APP_AVAILABILITY_COPY = "المتاح دلوقتي أول 3 أسابيع، وباقي الأسابيع هتتفتح مع نزول محاضراتها وتاسكاتها.";
+        const APP_AVAILABILITY_COPY = "المتاح دلوقتي أول 4 أسابيع، وباقي الأسابيع هتتفتح مع نزول محاضراتها وتاسكاتها.";
         const PROFILE_KEY = 'smarterStudentProfileV1:round5-live';
-        const APP_DATA_VERSION = 10;
+        const APP_DATA_VERSION = 15;
         const getTodayIso = () => new Date().toISOString().slice(0, 10);
         const parseDateSafe = (value) => {
             const date = value ? new Date(`${value}T12:00:00`) : new Date();
@@ -1654,8 +1668,8 @@
                 { tabId: 'lectures', icon: 'book-open', label: 'المحاضرات' },
                 { tabId: 'tasks', icon: 'clipboard-list', label: 'التاسكات' },
                 { tabId: 'notes', icon: 'layout-dashboard', label: 'مساحتي' },
-                { tabId: 'bonus', icon: 'gift', label: 'البونص' },
-                { tabId: 'more', icon: 'menu', label: 'المزيد' },
+                { tabId: 'bonus', icon: 'wrench', label: 'بنك الأدوات' },
+                { tabId: 'more', icon: 'gift', label: 'البونص' },
             ];
             return (
                 <nav className="fixed bottom-0 inset-x-0 bg-gradient-to-r from-[--accent-green] to-[--accent-navy] flex justify-around px-1 pt-2 pb-[max(.5rem,env(safe-area-inset-bottom))] z-50 shadow-t-lg overflow-x-auto">
@@ -2000,20 +2014,15 @@
                         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
                             <button onClick={() => onNavigate('lectures')} className="quick-action-card"><Icon name="book-open-check" className="w-7 h-7 text-[--accent-green] mb-3" /><strong className="block text-xl text-[--accent-navy] dark:text-white">{progress.lectureDone}/{progress.lectureTotal}</strong><span className="text-sm text-gray-500 dark:text-gray-300">محاضرات مكتملة</span></button>
                             <button onClick={() => onNavigate('tasks')} className="quick-action-card"><Icon name="list-checks" className="w-7 h-7 text-[--accent-green] mb-3" /><strong className="block text-xl text-[--accent-navy] dark:text-white">{progress.taskDone}/{progress.taskTotal}</strong><span className="text-sm text-gray-500 dark:text-gray-300">تاسكات مكتملة</span></button>
-                            <button onClick={() => onNavigate('notes')} className="quick-action-card"><Icon name="notebook-tabs" className="w-7 h-7 text-[--accent-green] mb-3" /><strong className="block text-lg text-[--accent-navy] dark:text-white">مساحتي</strong><span className="text-sm text-gray-500 dark:text-gray-300">رحلتك، أهدافك، ملاحظاتك وأدواتك</span></button>
-                            <button onClick={() => onNavigate('bonus')} className="quick-action-card"><Icon name="gift" className="w-7 h-7 text-[--accent-green] mb-3" /><strong className="block text-lg text-[--accent-navy] dark:text-white">البونص</strong><span className="text-sm text-gray-500 dark:text-gray-300">مصادر وأدوات إضافية</span></button>
+                            <button onClick={() => onNavigate('notes')} className="quick-action-card"><Icon name="notebook-tabs" className="w-7 h-7 text-[--accent-green] mb-3" /><strong className="block text-lg text-[--accent-navy] dark:text-white">مساحتي</strong><span className="text-sm text-gray-500 dark:text-gray-300">تقدمك، أهدافك وتاسكاتك</span></button>
+                            <button onClick={() => onNavigate('more')} className="quick-action-card"><Icon name="gift" className="w-7 h-7 text-[--accent-green] mb-3" /><strong className="block text-lg text-[--accent-navy] dark:text-white">البونص</strong><span className="text-sm text-gray-500 dark:text-gray-300">مساعدون، مهارات ومصادر إضافية</span></button>
                         </div>
                     </section>
 
                     <section className="content-card p-5 rounded-xl shadow-md"><div className="flex flex-col sm:flex-row sm:items-center gap-4"><div className="goal-icon"><Icon name="target" className="w-6 h-6" /></div><div className="flex-grow"><p className="text-xs font-bold text-[--accent-green] mb-1">بوصلتك في الرحلة</p><h3 className="font-bold text-xl text-[--accent-navy] dark:text-white">هدفك من الدبلومة</h3><p className="text-sm text-gray-600 dark:text-gray-300 mt-1 line-clamp-2">{profile.learningGoal || 'أضف هدفك عشان تتابع تطورك.'}</p></div><button type="button" onClick={() => onNavigate('notes')} className="btn-brand-navy px-4 py-2.5 rounded-lg font-bold inline-flex items-center justify-center gap-2"><Icon name="layout-dashboard" className="w-4 h-4" /> افتح مساحتي</button></div></section>
 
                     <section className="space-y-3">
-                        <div>
-                            <h3 className="text-2xl font-bold text-[--accent-navy] dark:text-white">معلومات مهمة للدفعة</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">المواعيد، التسجيلات، المجتمع، وطريقة حفظ التطبيق.</p>
-                        </div>
-
-                        <div className="home-info-grid">
+                        {false && <div className="home-info-grid">
                             <div className="home-info-card">
                                 <div className="home-info-icon"><Icon name="calendar-days" className="w-6 h-6" /></div>
                                 <div className="min-w-0">
@@ -2029,7 +2038,7 @@
                                     <p className="text-gray-700 dark:text-gray-200 mt-1">تقدر تسمع المحاضرة من التطبيق أو من يوتيوب. لو سمعتها على يوتيوب هتلاقيها في سجل المشاهدات (History) عندك.</p>
                                 </div>
                             </div>
-                        </div>
+                        </div>}
 
                         <a href={ROUND5_WHATSAPP_COMMUNITY_URL} target="_blank" rel="noopener noreferrer" className="community-home-card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4 transition-transform hover:-translate-y-0.5">
                             <div className="w-12 h-12 rounded-xl bg-[--accent-green] text-white grid place-items-center flex-shrink-0"><Icon name="message-circle" className="w-7 h-7" /></div>
@@ -2221,7 +2230,14 @@
                                 icon: "bot"
                             }
                         ]
-                    },
+                    }
+                ]
+            },
+            {
+                title: "الأسبوع الثالث: مراجعة على الأسبوع الأول والثاني",
+                summary: "أسبوع مراجعة مستقل ترتب فيه أهم أفكار وتطبيقات أول أسبوعين، وتثبت فهمك قبل ما تبدأ المحتوى والتواصل البصري.",
+                icon: "refresh-cw",
+                lectures: [
                     {
                         id: "review-01",
                         title: "مراجعة الأسبوع الأول والثاني",
@@ -2248,7 +2264,7 @@
                 ]
             },
             {
-                title: "الأسبوع الثالث: المحتوى والتواصل البصري",
+                title: "الأسبوع الرابع: المحتوى والتواصل البصري",
                 summary: "الأسبوع ده هتتعلم تنشئ صور بالذكاء الاصطناعي وتعدّلها، وبعدها تستخدم Canva عشان تطوّرها وتحوّلها لتصميمات مناسبة لشغلك أو دراستك.",
                 icon: "presentation",
                 lectures: [
@@ -2289,7 +2305,7 @@
                 ]
             },
             {
-                title: "الأسبوع الرابع: صناعة الفيديو",
+                title: "الأسبوع الخامس: صناعة الفيديو",
                 summary: "الأسبوع ده هتتعلم تحوّل فكرتك لفيديو، بداية من كتابة الفكرة وتقسيمها لمشاهد، لحد تجميع الفيديو وتجهيزه للنشر.",
                 icon: "clapperboard",
                 lectures: [
@@ -2298,7 +2314,7 @@
                 ]
             },
             {
-                title: "الأسبوع الخامس: مراجعة على ما سبق",
+                title: "الأسبوع السادس: مراجعة على ما سبق",
                 summary: "الأسبوع ده هنراجع اللي اتعلمناه، ونرتب الأدوات والمساعدين والخطوات مع بعض، ونطبّقهم على استخدام حقيقي.",
                 icon: "refresh-cw",
                 lectures: [
@@ -2307,7 +2323,7 @@
                 ]
             },
             {
-                title: "الأسبوع السادس: إنشاء المواقع والتطبيقات",
+                title: "الأسبوع السابع: إنشاء المواقع والتطبيقات",
                 summary: "الأسبوع ده هتتعلم تحوّل فكرتك لموقع أو تطبيق أو أداة بسيطة تعمل وتقدر تشاركها، من غير ما تكون مبرمج.",
                 icon: "code-2",
                 lectures: [
@@ -2316,7 +2332,7 @@
                 ]
             },
             {
-                title: "الأسبوع السابع: مشروع التخرج",
+                title: "الأسبوع الثامن: مشروع التخرج",
                 summary: "الأسبوع ده هتجمع رحلتك وأهم الحاجات اللي بنيتها، وتحولها لمشروع تخرج واضح تقدر تعرضه وتشاركه.",
                 icon: "award",
                 lectures: [
@@ -2775,8 +2791,8 @@
                         </div>
                     </div>}
 
-                    <div className="lesson-separator"></div>
-                    <div className="lecture-tool-panel notes-panel-highlight p-3 sm:p-4 space-y-4">
+                    {false && <div className="lesson-separator"></div>}
+                    {false && <div className="lecture-tool-panel notes-panel-highlight p-3 sm:p-4 space-y-4">
                         <div className="flex items-start justify-between gap-3 flex-wrap sm:flex-nowrap">
                             <div className="notes-panel-header min-w-0 flex-grow">
                                 <span className="notes-panel-icon"><Icon name="notebook-pen" className="w-5 h-5" /></span>
@@ -2818,7 +2834,7 @@
                                 ))}
                             </div>
                         </div>}
-                    </div>
+                    </div>}
 
                     <div className="lesson-separator"></div>
                     <div>
@@ -2871,8 +2887,7 @@
         };
         const LecturesTab = ({ setModalMessage, onOpenTaskWeek, onFloatLecture, currentWeekIndex, focusWeekIndex, onCelebrate }) => {
             const CURRENT_WEEK_INDEX = currentWeekIndex
-            const DEFAULT_OPEN_WEEK_INDEX = APP_MODE === 'live' ? CURRENT_WEEK_INDEX : getRecommendedWeekIndex();
-            const [openWeek, setOpenWeek] = useState(lecturesData[DEFAULT_OPEN_WEEK_INDEX]?.title || null);
+            const [openWeek, setOpenWeek] = useState(null);
             const [completedLectures, setCompletedLectures] = useState(readLectureCompletion);
 
 
@@ -2893,12 +2908,13 @@
                 });
             };
             useEffect(() => {
-                const targetIndex = focusWeekIndex ?? (APP_MODE === 'live' ? CURRENT_WEEK_INDEX : getRecommendedWeekIndex());
+                if (focusWeekIndex === null || focusWeekIndex === undefined) return;
+                const targetIndex = focusWeekIndex;
                 const targetWeek = lecturesData[targetIndex];
                 if (!targetWeek) return;
                 setOpenWeek(targetWeek.title);
                 window.setTimeout(() => document.getElementById(`lecture-week-${targetIndex}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
-            }, [focusWeekIndex, CURRENT_WEEK_INDEX]);
+            }, [focusWeekIndex]);
             
             let total = 0;
             let completed = 0;
@@ -2937,7 +2953,7 @@
                             <div className="flex-grow">
                                 <h3 className="section-header text-xl font-bold mb-1">المحاضرات متاحة داخل الموقع</h3>
                                 <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed">
-                                    شغّل المحاضرة وسجّل ملاحظاتك واحفظها، أو افتح قائمة تشغيل الدفعة على يوتيوب. أي محاضرة تسمعها هناك هتلاقيها في سجل المشاهدات (History) عندك.
+                                    افتح الأسبوع اللي عايزه وشغّل المحاضرة من التطبيق، أو افتح قائمة تشغيل الدفعة على يوتيوب. لما تخلص ارجع علّم على المحاضرة عشان تقدمك يتحدث.
                                 </p>
                                 <a href={ROUND5_YOUTUBE_PLAYLIST_URL} target="_blank" rel="noopener noreferrer" className="btn-brand-primary w-full sm:w-auto px-5 py-2.5 rounded-lg inline-flex items-center justify-center gap-2 text-sm font-bold mt-4">
                                     <Icon name="youtube" className="w-5 h-5" />
@@ -3326,11 +3342,18 @@
                 note: "الأسبوع الثاني فيه تاسكين: مساعد شخصي + بريزنتيشن. نفّذ تاسك كل محاضرة على حاجة حقيقية. مهارة البريزنتيشن اختيارية، ومفيدة أكتر لو البريزنتيشنز بتتكرر معاك."
             },
             {
-                title: "تاسكات الأسبوع الثالث: المحتوى والتواصل البصري",
+                title: "تاسكات الأسبوع الثالث: مراجعة على الأسبوع الأول والثاني",
+                deadline: "",
+                tasks: [],
+                note: "أسبوع المراجعة مخصص لترتيب وتثبيت اللي اتعلمته في أول أسبوعين، ومفيش فيه تاسك جديد."
+            },
+            {
+                title: "تاسكات الأسبوع الرابع: المحتوى والتواصل البصري",
                 deadline: "",
                 tasks: [
                     {
                         id: "task-lecture-05",
+                        storageWeekIndex: 2,
                         lectureId: "lecture-05",
                         required: true,
                         text: "اعمل صورة تستخدمها فعلًا",
@@ -3347,6 +3370,7 @@
                     },
                     {
                         id: "task-lecture-06",
+                        storageWeekIndex: 2,
                         lectureId: "lecture-06",
                         required: true,
                         text: "عدّل تصميمًا واستخدمه فعلًا",
@@ -3363,10 +3387,10 @@
                         ]
                     }
                 ],
-                note: "الأسبوع الثالث فيه تاسكين: صورة لاستخدام حقيقي + تطوير تصميم على Canva. نفّذ كل تاسك على حاجة هتستخدمها فعلًا."
+                note: "الأسبوع الرابع فيه تاسكين: صورة لاستخدام حقيقي + تطوير تصميم على Canva. نفّذ كل تاسك على حاجة هتستخدمها فعلًا."
             },
             {
-                title: "تاسكات الأسبوع الرابع: صناعة الفيديو",
+                title: "تاسكات الأسبوع الخامس: صناعة الفيديو",
                 deadline: "",
                 tasks: [
                     {
@@ -3388,7 +3412,7 @@
                 ]
             },
             {
-                title: "تاسكات الأسبوع الخامس: مراجعة على ما سبق",
+                title: "تاسكات الأسبوع السادس: مراجعة على ما سبق",
                 deadline: "",
                 tasks: [
                     {
@@ -3410,7 +3434,7 @@
                 ]
             },
             {
-                title: "تاسكات الأسبوع السادس: إنشاء المواقع والتطبيقات",
+                title: "تاسكات الأسبوع السابع: إنشاء المواقع والتطبيقات",
                 deadline: "",
                 tasks: [
                     {
@@ -3432,7 +3456,7 @@
                 ]
             },
             {
-                title: "تاسكات الأسبوع السابع: مشروع التخرج",
+                title: "تاسكات الأسبوع الثامن: مشروع التخرج",
                 deadline: "",
                 tasks: [
                     {
@@ -3609,7 +3633,8 @@
         };
         const getTaskWorkspaceId = (weekIndex, taskObj, taskIndex = 0) => {
             const scoped = typeof taskObj === 'object' ? (taskObj.id || taskObj.lectureId || '') : '';
-            return `${APP_STORAGE_NAMESPACE}:w${weekIndex + 1}:${scoped || `task-${taskIndex + 1}`}`;
+            const storageWeekIndex = typeof taskObj === 'object' && Number.isInteger(taskObj.storageWeekIndex) ? taskObj.storageWeekIndex : weekIndex;
+            return `${APP_STORAGE_NAMESPACE}:w${storageWeekIndex + 1}:${scoped || `task-${taskIndex + 1}`}`;
         };
         const getTaskShortTitle = (taskObj, index) => {
             const text = typeof taskObj === 'string' ? taskObj : taskObj.text;
@@ -3798,19 +3823,24 @@
                         <section className="task-section-card">
                             <h5 className="task-section-title"><Icon name="target" className="w-5 h-5 text-[--accent-green]" /> عملت إيه؟</h5>
                             <textarea className="app-field min-h-[105px]" value={draft.outcome || ''} onChange={e => patch({ outcome: e.target.value })} placeholder="نبذة بسيطة جدًا عن اللي عملته والنتيجة اللي وصلت لها..." />
-                            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
+                            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+                                <label className="block font-bold text-[--accent-navy] dark:text-white">رابط المخرج</label>
+                                <input dir="ltr" className="app-field text-left" value={draft.taskLink ?? (draft.resources || [])[0]?.url ?? ''} onChange={e => patch({ taskLink: e.target.value })} placeholder="الصق رابط الشغل أو الملف هنا" />
+                                <p className="text-xs text-gray-500 dark:text-gray-300">تأكد إن صلاحية الرابط تسمح بالمشاهدة.</p>
+                            </div>
+                            {false && <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
                                 <div><h6 className="font-bold text-[--accent-navy] dark:text-white">المخرج النهائي</h6><p className="text-xs text-gray-500 dark:text-gray-300 mt-1">ارفع شغلك على Drive أو شارك رابط المحادثة أو الملف، وحط الرابط هنا.</p></div>
                                 {(draft.resources || []).length > 0 && <div className="space-y-2">{draft.resources.map(resource => <article key={resource.id || resource.url} className="task-link-card"><div className="flex items-start gap-3"><div className="flex-grow min-w-0"><span className="task-link-type">{resource.type || 'رابط'}</span><strong className="block text-[--accent-navy] dark:text-white mt-2">{resource.label || 'مخرج التاسك'}</strong>{resource.description && <p className="text-sm text-gray-500 dark:text-gray-300 mt-1">{resource.description}</p>}<a href={resource.url} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-[--accent-green] inline-flex items-center gap-1 mt-2"><Icon name="external-link" className="w-3.5 h-3.5" /> فتح الرابط</a></div><button type="button" onClick={() => removeResource(resource.id)} className="task-mini-icon-btn !text-red-500" title="حذف الرابط"><Icon name="trash-2" className="w-4 h-4" /></button></div></article>)}</div>}
                                 <div className="grid sm:grid-cols-[190px_1fr] gap-2"><select className="app-field" value={resourceDraft.type} onChange={e => setResourceDraft({ ...resourceDraft, type:e.target.value, label:e.target.value })}><option>ملف أو رابط</option><option>محادثة</option><option>صور</option><option>فيديو</option><option>ملف صوتي</option><option>Notebook</option><option>مجموعة مخرجات</option></select><input className="app-field" value={resourceDraft.url} onChange={e => setResourceDraft({ ...resourceDraft, url:e.target.value })} placeholder="الصق رابط المخرج هنا" /></div>
                                 <div className="flex flex-wrap items-center gap-3"><button type="button" onClick={addResource} className="lecture-chip-button rounded-lg px-3 py-2 font-bold text-sm inline-flex items-center gap-2"><Icon name="link-2" className="w-4 h-4" /> إضافة الرابط</button><span className="text-xs text-amber-700 dark:text-amber-300">تأكد إن صلاحية الرابط تسمح بالمشاهدة.</span></div>
-                            </div>
+                            </div>}
                         </section>
 
-                        <section className="task-section-card">
+                        {false && <section className="task-section-card">
                             <div className="flex items-center justify-between gap-3 mb-3"><h5 className="task-section-title !mb-0"><Icon name="list-ordered" className="w-5 h-5 text-[--accent-green]" /> عملته إزاي؟ <span className="text-xs text-gray-400">اختياري</span></h5><button type="button" onClick={addStep} className="lecture-chip-button rounded-lg px-3 py-2 font-bold text-sm inline-flex items-center gap-1"><Icon name="plus" className="w-4 h-4" /> أضف خطوة</button></div>
                             <p className="text-sm text-gray-500 dark:text-gray-300 mb-3">لو حابب تشارك زملاءك الطريقة، اكتب الخطوات. ولو مش حابب سيبها فاضية.</p>
                             <div className="space-y-2">{(draft.steps || []).map((step, idx) => <div key={step.id} className="task-step-row"><span className="task-step-number">{idx + 1}</span><textarea className="app-field !p-2 min-h-[64px] text-sm" value={step.text || ''} onChange={e => updateStep(step.id, e.target.value)} placeholder={`اكتب الخطوة ${idx + 1}...`} /><div className="flex gap-1"><button type="button" className="task-mini-icon-btn" onClick={() => moveStep(idx, -1)} title="تحريك لأعلى"><Icon name="arrow-up" className="w-4 h-4" /></button><button type="button" className="task-mini-icon-btn" onClick={() => moveStep(idx, 1)} title="تحريك لأسفل"><Icon name="arrow-down" className="w-4 h-4" /></button><button type="button" className="task-mini-icon-btn !text-red-500" onClick={() => removeStep(step.id)} title="حذف"><Icon name="trash-2" className="w-4 h-4" /></button></div></div>)}</div>
-                        </section>
+                        </section>}
 
                         {false && <section className="task-section-card">
                             <div className="flex flex-wrap items-center justify-between gap-3 mb-3"><h5 className="task-section-title !mb-0"><Icon name="wrench" className="w-5 h-5 text-[--accent-green]" /> الأدوات والمساعدون والمهارات</h5><button type="button" onClick={() => setShowToolPicker(prev => !prev)} className="lecture-chip-button rounded-lg px-3 py-2 font-bold text-sm inline-flex items-center gap-1"><Icon name="search" className="w-4 h-4" /> {showToolPicker ? 'إخفاء الصندوق' : 'اختار من صندوق الأدوات'}</button></div>
@@ -3819,7 +3849,7 @@
                             <textarea className="app-field min-h-[88px]" value={draft.assistantsSkills || ''} onChange={e => patch({ assistantsSkills: e.target.value })} placeholder="اكتب المساعد أو المساعدين والمهارات اللي استخدمتها: Prompting، بحث، Storytelling، تصميم، مراجعة..." />
                         </section>}
 
-                        <section className="task-section-card">
+                        {false && <section className="task-section-card">
                             <h5 className="task-section-title"><Icon name="chart-no-axes-combined" className="w-5 h-5 text-[--accent-green]" /> تقييم سريع</h5>
                             <div className="grid md:grid-cols-3 gap-3">
                                 <select className="app-field" value={draft.difficulty || ''} onChange={e => patch({ difficulty: e.target.value })}><option value="">صعوبة التاسك</option><option>سهل</option><option>متوسط</option><option>صعب</option></select>
@@ -3827,15 +3857,13 @@
                                 <select className="app-field" value={draft.workflowDecision || ''} onChange={e => patch({ workflowDecision: e.target.value })}><option value="">هتستخدم التجربة تاني؟</option><option>كانت تجربة ومش محتاج أكررها</option><option>ممكن أرجع لها بعدين</option><option>هستخدمها فعلًا</option><option>هضيفها داخل مسار شغلي</option></select>
                             </div>
                             <textarea className="app-field min-h-[92px] mt-3" value={draft.impact || ''} onChange={e => patch({ impact: e.target.value })} placeholder="التاسك فرقت معاك إزاي؟ — اختياري" />
-                        </section>
+                        </section>}
 
                         {message && <p className="text-sm font-bold text-[--accent-green]">{message}</p>}
                         {manualCopyText && <div className="manual-copy-box"><div className="flex justify-between mb-2"><strong>نسخ يدوي</strong><button type="button" onClick={() => setManualCopyText('')} className="text-red-500 font-bold">إغلاق</button></div><textarea readOnly value={manualCopyText} onFocus={e => e.target.select()} onClick={e => e.target.select()} /></div>}
                         <div className="task-studio-actions">
                             <button type="button" onClick={saveDraft} className="task-draft-button"><Icon name="save" className="w-4 h-4" /> حفظ ومتابعة لاحقًا</button>
                             {status !== 'completed' ? <button type="button" onClick={completeTask} className="task-complete-button"><Icon name="badge-check" className="w-4 h-4" /> اعتمد التاسك كمكتمل</button> : <button type="button" onClick={reopenTask} className="lecture-chip-button rounded-lg px-4 py-2 font-bold inline-flex items-center gap-2"><Icon name="pencil" className="w-4 h-4" /> رجّعه للتطوير</button>}
-                            <button type="button" onClick={copyTask} className="share-card-button"><Icon name="copy" className="w-4 h-4" /> نسخ التجربة</button><button type="button" onClick={shareTask} className="share-card-button"><Icon name="share-2" className="w-4 h-4" /> مشاركة</button><button type="button" onClick={saveImage} className="share-card-button"><Icon name="image-down" className="w-4 h-4" /> حفظ كصورة</button>
-                            {personalSpaceUrl && <a href={personalSpaceUrl} target="_blank" rel="noopener noreferrer" className="share-card-button"><Icon name="external-link" className="w-4 h-4" /> أضفها لمساحتي</a>}
                         </div>
                     </div>}
                 </article>
@@ -4966,9 +4994,7 @@
 
             return (
                 <div className="space-y-8">
-                    <Reminder>{reminderText}</Reminder>
-                    
-                    <div className="workflows-highlight-card border-2 border-[--accent-green] rounded-xl p-6 text-center shadow-md transform transition-all hover:scale-[1.01]">
+                    {false && <div className="workflows-highlight-card border-2 border-[--accent-green] rounded-xl p-6 text-center shadow-md transform transition-all hover:scale-[1.01]">
                         <a 
                             href="https://mahmoudtaru.github.io/Smarter-Workflows/" 
                             target="_blank"
@@ -4981,10 +5007,11 @@
                         <p className="workflows-highlight-copy mt-4 font-bold text-base sm:text-lg">
                             مساراتك، أدواتك، مساعدينك في مكان واحد
                         </p>
-                    </div>
+                    </div>}
 
-                    <div className="space-y-4">
+                    <div className="flex flex-col gap-4">
                         
+                        <div className="order-4">
                         <Accordion 
                             title="أدوات الدبلومة (Smarter Tools)" 
                             isOpen={openAccordion === "smarter_tools"} 
@@ -5030,7 +5057,9 @@
                                 linkLabel="زيارة موقع المساعدين"
                             />
                         </Accordion>
+                        </div>
 
+                        <div className="order-1">
                         <Accordion
                             title="مساعدو الدبلومة (Smarter Assistants)"
                             isOpen={openAccordion === "smarter_assistants"}
@@ -5038,7 +5067,9 @@
                         >
                             <AssistantsLibrary />
                         </Accordion>
+                        </div>
 
+                        <div className="order-2">
                         <Accordion
                             title="مهارات الدبلومة (Smarter Skills)"
                             isOpen={openAccordion === "smarter_skills"}
@@ -5064,8 +5095,10 @@
                                 </p>
                             </div>
                         </Accordion>
+                        </div>
 
                         {/* Workflows Accordion (الدليل العملي لمسارات الذكاء الاصطناعي) */}
+                        <div className="order-3 space-y-4">
                         <Accordion 
                             title="مسارات Workflows (الدليل المفصل)" 
                             isOpen={openAccordion === "workflows"} 
@@ -5176,9 +5209,10 @@
                                 </NestedAccordion>
                             ))}
                         </Accordion>
+                        </div>
                     </div>
                     
-                    <div>
+                    {false && <div>
                         <h2 className="subsection-title text-2xl sm:text-3xl font-bold mb-6 text-center">بنك أدوات الذكاء الاصطناعي</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {toolsData.map((category, index) => (
@@ -5190,7 +5224,44 @@
                                 />
                             ))}
                         </div>
+                    </div>}
+                </div>
+            );
+        };
+
+        const WorkflowsLaunchCard = () => (
+            <div className="workflows-highlight-card border-2 border-[--accent-green] rounded-xl p-5 text-center shadow-md">
+                <a href="https://mahmoudtaru.github.io/Smarter-Workflows/" target="_blank" rel="noopener noreferrer" className="btn-brand-primary hover:opacity-90 font-bold rounded-lg text-base sm:text-lg px-6 py-3 inline-flex flex-wrap items-center justify-center gap-3 w-full sm:w-auto">
+                    <Icon name="route" className="w-5 h-5"/>
+                    <span>فتح مسارات Workflows</span>
+                </a>
+                <p className="workflows-highlight-copy mt-3 font-bold text-sm sm:text-base">مساراتك، أدواتك ومساعديك في مكان واحد</p>
+            </div>
+        );
+
+        const ToolBankTab = () => {
+            const [openToolAccordion, setOpenToolAccordion] = useState(null);
+            return (
+                <div className="space-y-6">
+                    <div className="content-card p-5 sm:p-6 rounded-xl shadow-md">
+                        <p className="text-xs font-bold text-[--accent-green] mb-1">كل الأدوات في مكان واحد</p>
+                        <h2 className="page-title text-2xl sm:text-3xl font-bold">بنك الأدوات</h2>
+                        <p className="text-gray-600 dark:text-gray-300 mt-2">اختار الأداة المناسبة، وافتحها مباشرة. تقدر كمان تحفظ أدواتك المفضلة وتضيف أدواتك الخاصة.</p>
                     </div>
+                    <ToolboxManager />
+                    <section>
+                        <h3 className="subsection-title text-xl sm:text-2xl font-bold mb-4">كل أدوات الذكاء الاصطناعي</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {toolsData.map((category, index) => (
+                                <ToolCard
+                                    key={index}
+                                    category={category}
+                                    isOpen={openToolAccordion === category.title}
+                                    onToggle={() => setOpenToolAccordion(openToolAccordion === category.title ? null : category.title)}
+                                />
+                            ))}
+                        </div>
+                    </section>
                 </div>
             );
         };
@@ -5279,12 +5350,6 @@
 
             return (
                 <div className="space-y-6">
-                    <Reminder>
-                        رسالة شكر: رحلتنا معكم ممتعة، وبكم نكبر ونتطور. رأيك يساهم في تحسين الدبلومة، ودعوتك لأصدقائك توسّع مجتمعنا. هدفنا أن نصبح جميعًا Smarter With AI.
-                    </Reminder>
-
-                    <DataBackupPanel />
-                    
                     <div className="space-y-4">
                         <Accordion 
                             title="ترشيحاتي الخاصة" 
@@ -5527,7 +5592,7 @@
 
                     </div>
 
-                    <div className="content-card p-8 rounded-lg shadow-md max-w-2xl mx-auto text-center mt-6">
+                    {false && <div className="content-card p-8 rounded-lg shadow-md max-w-2xl mx-auto text-center mt-6">
                         <Icon name="gift" className="w-16 h-16 mx-auto text-[--accent-green]" />
                         <h2 className="page-title text-2xl sm:text-3xl font-bold text-center my-4">شارك الدبلومة مع أحبابك!</h2>
                         <p className="text-gray-700 dark:text-gray-300 mb-2">لأننا مبسوطين بوجودك معانا، نحب نشاركك الفرصة دي عشان أصحابك وحبايبك ينضموا لينا.</p>
@@ -5536,8 +5601,8 @@
                             <Icon name="message-circle" />
                             <span>اطلب كود الدعوة الخاص بيك</span>
                         </a>
-                    </div>
-                    <div className="content-card alumni-community-card p-6 sm:p-8 rounded-xl shadow-md max-w-3xl mx-auto text-center">
+                    </div>}
+                    {false && <div className="content-card alumni-community-card p-6 sm:p-8 rounded-xl shadow-md max-w-3xl mx-auto text-center">
                         <div className="alumni-community-icon"><Icon name="users-round" className="w-9 h-9" /></div>
                         <span className="inline-flex items-center justify-center gap-2 text-sm font-bold text-[--accent-green] mt-5 mb-2"><Icon name="gift" className="w-4 h-4" /> مجتمع الدفعة الخامسة</span>
                         <h2 className="page-title text-2xl sm:text-3xl font-bold mb-4">انضم لمجتمع الخريجين</h2>
@@ -5546,7 +5611,7 @@
                         <div className="alumni-benefit-box mb-5 text-sm sm:text-base leading-relaxed"><strong className="text-[--accent-navy] dark:text-[--accent-green]">مجتمع الدفعة جزء من رحلتك؛ اسأل وشارك تطبيقاتك وكمل مع زملائك.</strong></div>
                         <div className="alumni-cta-row"><a href={ROUND5_WHATSAPP_COMMUNITY_URL} target="_blank" rel="noopener noreferrer" className="text-white bg-gradient-to-r from-[--accent-green] to-[--accent-navy] hover:opacity-90 font-bold rounded-xl text-base sm:text-lg px-7 py-3.5 text-center transition-transform transform hover:scale-[1.02] inline-flex items-center justify-center gap-2"><Icon name="message-circle" /><span>انضم لمجتمع الدفعة على واتساب</span></a></div>
                         <p className="text-xs text-gray-500 dark:text-gray-300 mt-3">الرابط مخصص لطلاب الدفعة الخامسة.</p>
-                    </div>
+                    </div>}
                 </div>
             );
         };
@@ -5706,6 +5771,30 @@
             </section>;
         };
 
+        const MyLecturesJourney = ({ onOpenLecture }) => {
+            const [lectureStatus, setLectureStatus] = useState(readLectureCompletion);
+            useEffect(() => {
+                const refresh = () => setLectureStatus(readLectureCompletion());
+                window.addEventListener('smarter-progress-updated', refresh);
+                window.addEventListener('storage', refresh);
+                return () => { window.removeEventListener('smarter-progress-updated', refresh); window.removeEventListener('storage', refresh); };
+            }, []);
+            const availableLectures = lecturesData.slice(0, LAST_RELEASED_WEEK_INDEX + 1).flatMap((week, weekIndex) => (week.lectures || []).filter(isLectureReleased).map((lecture, lectureIndex) => ({
+                lecture,
+                weekIndex,
+                weekTitle: week.title,
+                completed: !!lectureStatus[getLectureCompletionKey(weekIndex, lecture, lectureIndex)]
+            })));
+            const completedLectures = availableLectures.filter(item => item.completed);
+            const remainingLectures = availableLectures.filter(item => !item.completed);
+            const renderLectureLink = item => <button type="button" key={item.lecture.id} onClick={() => onOpenLecture(item.weekIndex)} className="journey-task-link"><div className="flex items-start gap-3"><span className={`task-status-badge ${item.completed ? 'task-status-completed' : 'task-status-not-started'}`}>{item.completed ? 'اتسمعت' : 'اسمعها'}</span><div className="flex-grow min-w-0"><strong className="block text-[--accent-navy] dark:text-white">{item.lecture.title}</strong><span className="block text-xs text-[--accent-green] font-bold mt-2">{cleanWeekTitle(item.weekTitle)} · اضغط للذهاب للمحاضرة</span></div><Icon name="arrow-up-left" className="w-5 h-5 text-[--accent-green] flex-shrink-0" /></div></button>;
+            return <section className="space-section space-y-5">
+                <div><h3 className="font-bold text-lg text-[--accent-navy] dark:text-white">محاضراتي</h3><p className="text-sm text-gray-500 dark:text-gray-300 mt-1">المحاضرات اللي سمعتها واللي لسه عليك من المحتوى المتاح.</p></div>
+                <div className="space-y-3"><div className="flex items-center justify-between gap-2"><h4 className="font-bold text-[--accent-navy] dark:text-white">اللي سمعته</h4><span className="task-link-type">{completedLectures.length}</span></div>{completedLectures.length ? <div className="grid lg:grid-cols-2 gap-3">{completedLectures.map(renderLectureLink)}</div> : <div className="notes-empty-state p-4 text-center"><p className="text-sm font-bold text-[--accent-navy] dark:text-white">لسه ما علّمتش على محاضرة كمكتملة.</p></div>}</div>
+                <div className="space-y-3"><div className="flex items-center justify-between gap-2"><h4 className="font-bold text-[--accent-navy] dark:text-white">اللي لسه عليك</h4><span className="task-link-type">{remainingLectures.length}</span></div>{remainingLectures.length ? <div className="grid lg:grid-cols-2 gap-3">{remainingLectures.map(renderLectureLink)}</div> : <div className="notes-empty-state p-4 text-center"><p className="text-sm font-bold text-[--accent-navy] dark:text-white">عاش! سمعت كل المحاضرات المتاحة.</p></div>}</div>
+            </section>;
+        };
+
         const MyTasksJourney = ({ profile, taskRecords, onOpenTask }) => {
             const [activeFilter, setActiveFilter] = useState('completed');
             const [customEntries, setCustomEntries] = useState(readCustomTasks);
@@ -5714,11 +5803,11 @@
                 window.addEventListener('smarter-custom-tasks-updated', refresh);
                 return () => window.removeEventListener('smarter-custom-tasks-updated', refresh);
             }, []);
-            const courseTasks = tasksData.flatMap((week, weekIndex) => (week.tasks || []).map((task, taskIndex) => {
+            const courseTasks = tasksData.slice(0, LAST_RELEASED_WEEK_INDEX + 1).flatMap((week, weekIndex) => (week.tasks || []).map((task, taskIndex) => {
                 const taskId = getTaskWorkspaceId(weekIndex, task, taskIndex);
                 const record = taskRecords[taskId] || {};
-                return { taskId, weekIndex, taskIndex, weekTitle:week.title, title:getTaskPresentation(weekIndex, taskIndex, task).title, status:record.status || 'not-started', updatedAt:record.updatedAt };
-            }));
+                return { taskId, weekIndex, taskIndex, weekTitle:week.title, title:getTaskPresentation(weekIndex, taskIndex, task).title, status:record.status || 'not-started', updatedAt:record.updatedAt, released:task.released !== false };
+            })).filter(task => task.released);
             const normalizedStatus = value => value === 'completed' ? 'completed' : ['in-progress','draft'].includes(value) ? 'in-progress' : 'not-started';
             const filtered = courseTasks.filter(task => normalizedStatus(task.status) === activeFilter);
             const counts = {
@@ -5740,10 +5829,16 @@
                 const next=customEntries.filter(entry=>entry.id!==id);
                 localStorage.setItem(CUSTOM_TASKS_KEY,JSON.stringify(next)); setCustomEntries(next); dispatchSmarterEvent('smarter-custom-tasks-updated');
             };
+            const completedTasks = courseTasks.filter(task => normalizedStatus(task.status) === 'completed');
+            const remainingTasks = courseTasks.filter(task => normalizedStatus(task.status) !== 'completed');
+            const renderTaskLink = task => {
+                const status = normalizedStatus(task.status);
+                return <button type="button" key={task.taskId} onClick={()=>onOpenTask(task.weekIndex,task.taskId)} className="journey-task-link"><div className="flex items-start gap-3"><span className={`task-status-badge task-status-${status}`}>{status === 'completed' ? 'مكتمل' : status === 'in-progress' ? 'كمّل التاسك' : 'ابدأ الآن'}</span><div className="flex-grow min-w-0"><strong className="block text-[--accent-navy] dark:text-white">{task.title}</strong><span className="block text-xs text-[--accent-green] font-bold mt-2">{cleanWeekTitle(task.weekTitle)} · اضغط للذهاب للتاسك</span></div><Icon name="arrow-up-left" className="w-5 h-5 text-[--accent-green] flex-shrink-0" /></div></button>;
+            };
             return <section className="space-section space-y-4">
-                <div><h3 className="font-bold text-lg text-[--accent-navy] dark:text-white">رحلة تاسكاتك</h3><p className="text-sm text-gray-500 dark:text-gray-300 mt-1">كل تاسك بيتنقل تلقائيًا حسب آخر حالة حفظتها.</p></div>
-                <div className="my-tasks-tabs" role="tablist">{filters.map(filter=><button type="button" key={filter.id} onClick={()=>setActiveFilter(filter.id)} className={`my-tasks-tab ${activeFilter===filter.id?'active':''}`}>{filter.label} <span className="opacity-75">({counts[filter.id]})</span></button>)}</div>
-                {activeFilter==='custom' ? (customEntries.length ? <div className="space-y-3">{customEntries.slice().reverse().map(entry=><CustomEntryCard key={entry.id} entry={{kind:'تجربة',status:'planned',...entry,weekTitle:entry.weekTitle||(entry.linkedWeek!=='none'?tasksData[Number(entry.linkedWeek)]?.title:'')}} profile={profile} onUpdate={updateCustom} onDelete={deleteCustom} />)}</div> : <div className="notes-empty-state p-6 text-center"><h4 className="font-bold text-[--accent-navy] dark:text-white">لسه مفيش إضافات خاصة</h4><p className="text-sm text-gray-500 mt-1">أضف تجربة أو تحدي من تاب التاسكات، وهتظهر هنا فورًا.</p></div>) : (filtered.length ? <div className="grid lg:grid-cols-2 gap-3">{filtered.map(task=><button type="button" key={task.taskId} onClick={()=>onOpenTask(task.weekIndex,task.taskId)} className="journey-task-link"><div className="flex items-start gap-3"><span className={`task-status-badge task-status-${normalizedStatus(task.status)}`}>{activeFilter==='completed'?'مكتمل':activeFilter==='in-progress'?'قيد التنفيذ':'ابدأ الآن'}</span><div className="flex-grow min-w-0"><strong className="block text-[--accent-navy] dark:text-white">{task.title}</strong><span className="block text-xs text-[--accent-green] font-bold mt-2">{cleanWeekTitle(task.weekTitle)} · اضغط للذهاب للتاسك</span></div><Icon name="arrow-up-left" className="w-5 h-5 text-[--accent-green] flex-shrink-0" /></div></button>)}</div> : <div className="notes-empty-state p-6 text-center"><p className="font-bold text-[--accent-navy] dark:text-white">مفيش تاسكات في الحالة دي حاليًا.</p></div>)}
+                <div><h3 className="font-bold text-lg text-[--accent-navy] dark:text-white">تاسكاتي</h3><p className="text-sm text-gray-500 dark:text-gray-300 mt-1">تابع اللي خلصته واللي لسه عليك، واضغط على أي تاسك عشان تفتحه.</p></div>
+                <div className="space-y-3"><div className="flex items-center justify-between gap-2"><h4 className="font-bold text-[--accent-navy] dark:text-white">اللي خلصته</h4><span className="task-link-type">{completedTasks.length}</span></div>{completedTasks.length ? <div className="grid lg:grid-cols-2 gap-3">{completedTasks.map(renderTaskLink)}</div> : <div className="notes-empty-state p-4 text-center"><p className="text-sm font-bold text-[--accent-navy] dark:text-white">لسه مفيش تاسك مكتمل.</p></div>}</div>
+                <div className="space-y-3"><div className="flex items-center justify-between gap-2"><h4 className="font-bold text-[--accent-navy] dark:text-white">اللي لسه عليك</h4><span className="task-link-type">{remainingTasks.length}</span></div>{remainingTasks.length ? <div className="grid lg:grid-cols-2 gap-3">{remainingTasks.map(renderTaskLink)}</div> : <div className="notes-empty-state p-4 text-center"><p className="text-sm font-bold text-[--accent-navy] dark:text-white">عاش! خلصت كل التاسكات المتاحة.</p></div>}</div>
             </section>;
         };
 
@@ -5765,8 +5860,8 @@
             };
             return <section className="personal-space-card space-y-4">
                 <div className="flex flex-col lg:flex-row lg:items-center gap-4"><div className="personal-space-icon"><Icon name="panel-top-open" className="w-7 h-7" /></div><div className="flex-grow"><p className="text-xs font-bold text-[--accent-green] mb-1">مشروعك اللي بيكبر معاك</p><h3 className="text-xl font-bold text-[--accent-navy] dark:text-white">مساحتي الشخصية مع الـ AI</h3><p className="text-sm text-gray-600 dark:text-gray-300 mt-1">احفظ رابط موقعك أو Dashboard بتاعتك مرة واحدة، وارجع لها من التطبيق في أي وقت.</p></div>{savedUrl && <a href={savedUrl} target="_blank" rel="noopener noreferrer" className="task-complete-button justify-center"><Icon name="external-link" className="w-4 h-4" /> الذهاب إلى مساحتي</a>}</div>
-                {savedUrl && !isEditing ? <div className="space-link-preview"><Icon name="link-2" className="w-4 h-4 text-[--accent-green] flex-shrink-0" /><span dir="ltr" className="truncate text-sm flex-grow text-left">{savedUrl}</span><button type="button" onClick={() => setIsEditing(true)} className="share-card-button"><Icon name="pencil" className="w-4 h-4" /> تعديل</button><button type="button" onClick={remove} className="task-mini-icon-btn !text-red-500" title="إزالة الرابط"><Icon name="trash-2" className="w-4 h-4" /></button></div> : <div className="space-y-3"><div className="flex flex-col sm:flex-row gap-2"><input dir="ltr" className="app-field flex-grow text-left" value={draftUrl} onChange={e => setDraftUrl(e.target.value)} placeholder="https://رابط-مساحتك.com" /><button type="button" onClick={save} className="btn-brand-primary px-5 py-2.5 rounded-lg font-bold inline-flex items-center justify-center gap-2"><Icon name="save" className="w-4 h-4" /> حفظ الرابط</button>{savedUrl && <button type="button" onClick={() => { setDraftUrl(savedUrl); setIsEditing(false); }} className="lecture-chip-button px-4 py-2.5 rounded-lg font-bold">إلغاء</button>}</div><p className="text-xs text-gray-500 dark:text-gray-300">لسه ما عملتش مساحتك؟ افتح التمبليت، خصّصه في أي شات، وبعد ما تنشره ارجع حط الرابط هنا.</p></div>}
-                <div className="flex flex-wrap gap-2"><a href={PERSONAL_SPACE_TEMPLATE_FILE} target="_blank" className="share-card-button"><Icon name="layout-template" className="w-4 h-4" /> افتح تمبليت مساحتي</a>{savedUrl && <button type="button" onClick={() => copyToClipboard(savedUrl)} className="share-card-button"><Icon name="copy" className="w-4 h-4" /> نسخ الرابط</button>}</div>
+                {savedUrl && !isEditing ? <div className="space-link-preview"><Icon name="link-2" className="w-4 h-4 text-[--accent-green] flex-shrink-0" /><span dir="ltr" className="truncate text-sm flex-grow text-left">{savedUrl}</span><button type="button" onClick={() => setIsEditing(true)} className="share-card-button"><Icon name="pencil" className="w-4 h-4" /> تعديل</button><button type="button" onClick={remove} className="task-mini-icon-btn !text-red-500" title="إزالة الرابط"><Icon name="trash-2" className="w-4 h-4" /></button></div> : <div className="space-y-3"><div className="flex flex-col sm:flex-row gap-2"><input dir="ltr" className="app-field flex-grow text-left" value={draftUrl} onChange={e => setDraftUrl(e.target.value)} placeholder="https://رابط-مساحتك.com" /><button type="button" onClick={save} className="btn-brand-primary px-5 py-2.5 rounded-lg font-bold inline-flex items-center justify-center gap-2"><Icon name="save" className="w-4 h-4" /> حفظ الرابط</button>{savedUrl && <button type="button" onClick={() => { setDraftUrl(savedUrl); setIsEditing(false); }} className="lecture-chip-button px-4 py-2.5 rounded-lg font-bold">إلغاء</button>}</div><p className="text-xs text-gray-500 dark:text-gray-300">لو عندك موقع أو Dashboard شخصية، حط رابطها هنا وارجع لها بسهولة.</p></div>}
+                {savedUrl && <div className="flex flex-wrap gap-2"><button type="button" onClick={() => copyToClipboard(savedUrl)} className="share-card-button"><Icon name="copy" className="w-4 h-4" /> نسخ الرابط</button></div>}
                 {message && <p className="text-sm font-bold text-[--accent-green]">{message}</p>}
             </section>;
         };
@@ -5776,7 +5871,7 @@
             <div className="space-accordion-body">{children}</div>
         </details>;
 
-        const MySpace = ({ profile, onCelebrate, onEditProfile, onOpenTask }) => {
+        const MySpace = ({ profile, onCelebrate, onEditProfile, onOpenTask, onOpenLecture }) => {
             const [progress, setProgress] = useState(() => getProgressSnapshot(COURSE_WEEK_COUNT - 1));
             const [taskRecords, setTaskRecords] = useState(readTaskWorkspace);
             const [notesCount, setNotesCount] = useState(() => collectAllNotes().length);
@@ -5793,16 +5888,13 @@
             const journey = progress.lectureDone === 0 ? 'لسه في بداية الرحلة. أول محاضرة وأول تاسك موثق هيبدأوا يبنوا مكتبتك الشخصية.' : percent < 40 ? 'بدأت تبني أساس قوي، والأهم دلوقتي إنك توثق التطبيقات مش بس تسمع المحتوى.' : percent < 80 ? 'رحلتك بقت واضحة: عندك معرفة، تطبيقات وملاحظات. ركّز على تحويل أفضل التجارب لـ Workflows.' : 'وصلت لمرحلة قوية جدًا. راجع أفضل التاسكات، طوّرها، واستخدمها كعينات شغل وأنظمة متكررة.';
             return <div className="space-y-6">
                 <section className="learning-os-hero"><div className="relative z-10 flex flex-col lg:flex-row lg:items-center gap-5"><div className="profile-avatar !w-16 !h-16 !bg-[--accent-green] !text-[--accent-navy] text-2xl">{profile.firstName.charAt(0)}</div><div className="flex-grow"><p className="text-sm font-bold text-[--accent-green] mb-1">مساحتي في Smarter With AI</p><h2 className="text-3xl sm:text-4xl font-bold">{profile.firstName}</h2><p className="text-white/80 mt-1">{profile.profession || 'رحلة تعلم وتطبيق شخصية'}</p></div><button type="button" onClick={onEditProfile} className="bg-white/12 border border-white/20 text-white rounded-xl px-4 py-3 font-bold inline-flex items-center justify-center gap-2"><Icon name="user-cog" className="w-5 h-5" /> تعديل بياناتي</button></div></section>
-                <section className="space-stats-strip"><div className="learning-stat-card"><span className="learning-stat-number">{progress.lectureDone}</span><p className="text-sm font-bold mt-2">محاضرة</p><span className="text-xs text-gray-500 dark:text-gray-300">من {progress.lectureTotal}</span></div><div className="learning-stat-card"><span className="learning-stat-number">{progress.taskDone}</span><p className="text-sm font-bold mt-2">تاسك</p><span className="text-xs text-gray-500 dark:text-gray-300">من {progress.taskTotal}</span></div><div className="learning-stat-card"><span className="learning-stat-number">{percent}%</span><p className="text-sm font-bold mt-2">تطوري</p><span className="text-xs text-gray-500 dark:text-gray-300">الرحلة</span></div><div className="learning-stat-card"><span className="learning-stat-number">{notesCount}</span><p className="text-sm font-bold mt-2">ملاحظة</p><span className="text-xs text-gray-500 dark:text-gray-300">محفوظة</span></div><div className="learning-stat-card"><span className="learning-stat-number">{goalUpdates}</span><p className="text-sm font-bold mt-2">تحديث</p><span className="text-xs text-gray-500 dark:text-gray-300">على هدفي</span></div></section>
+                <section className="space-stats-strip"><div className="learning-stat-card"><span className="learning-stat-number">{progress.lectureDone}</span><p className="text-sm font-bold mt-2">محاضرة مكتملة</p><span className="text-xs text-gray-500 dark:text-gray-300">من {progress.lectureTotal}</span></div><div className="learning-stat-card"><span className="learning-stat-number">{progress.taskDone}</span><p className="text-sm font-bold mt-2">تاسك مكتمل</p><span className="text-xs text-gray-500 dark:text-gray-300">من {progress.taskTotal}</span></div><div className="learning-stat-card"><span className="learning-stat-number">{percent}%</span><p className="text-sm font-bold mt-2">تقدمي</p><span className="text-xs text-gray-500 dark:text-gray-300">في الدبلومة</span></div></section>
                 <section className="space-section"><div className="journey-summary-box"><p className="text-sm font-bold text-[--accent-green] mb-1">نبذة عن رحلتك</p><h3 className="space-section-heading mb-2"><Icon name="route" className="w-5 h-5 text-[--accent-green]" /> أنت وصلت لفين؟</h3><p className="leading-relaxed text-gray-700 dark:text-gray-200">{journey}</p></div></section>
+                <SpaceAccordion icon="book-open-check" title="محاضراتي" subtitle="اللي سمعته واللي لسه عليك" count={progress.lectureTotal}><MyLecturesJourney onOpenLecture={onOpenLecture} /></SpaceAccordion>
+                <SpaceAccordion icon="briefcase-business" title="تاسكاتي" subtitle="اللي خلصته واللي لسه عليك" count={progress.taskTotal} defaultOpen><MyTasksJourney profile={profile} taskRecords={taskRecords} onOpenTask={onOpenTask} /></SpaceAccordion>
                 <SpaceAccordion icon="panel-top-open" title="رابط مساحتي الشخصية" subtitle="احفظ أو افتح رابط موقعك الشخصي"><PersonalSpaceLinkCard /></SpaceAccordion>
                 <SpaceAccordion icon="target" title="أهدافي وتطوري" subtitle="هدف البداية وكل التحديثات اللي وصلت لها" count={goalUpdates}><GoalJourneyCard profile={profile} onCelebrate={onCelebrate} onEditProfile={onEditProfile} /></SpaceAccordion>
-                <SpaceAccordion icon="briefcase-business" title="تاسكاتي" subtitle="مكتمل، قيد التنفيذ، لسه معملتهاش وإضافاتك الخاصة" count={progress.taskTotal}><MyTasksJourney profile={profile} taskRecords={taskRecords} onOpenTask={onOpenTask} /></SpaceAccordion>
-                <SpaceAccordion icon="notebook-tabs" title="ملاحظاتي" subtitle="اكتب جديد أو ارجع للملاحظات المحفوظة" count={notesCount}><NotesLibrary profile={profile} onCelebrate={onCelebrate} /></SpaceAccordion>
-                <SpaceAccordion icon="boxes" title="صندوق أدواتي" subtitle="الأدوات المفضلة وإدارتها"><ToolboxManager /></SpaceAccordion>
-                <SpaceAccordion icon="bot" title="مساعديني" subtitle="اختار من مساعدي الدبلومة أو أضف مساعدًا جديدًا"><AssistantsLibrary personal /></SpaceAccordion>
-                <SpaceAccordion icon="sparkles" title="مهاراتي" subtitle="أضف مهاراتك ونبذة ورابط لكل مهارة"><SkillsLibrary /></SpaceAccordion>
-                <SpaceAccordion icon="route" title="مساراتي" subtitle="اختار مسارًا جاهزًا أو ابنِ مسارك الخاص"><MyPathsManager /></SpaceAccordion>
+                <DataBackupPanel />
             </div>;
         };
 
@@ -5968,7 +6060,7 @@
                             <Icon name="play-circle" className="w-9 h-9" />
                         </span>
                         <p className="text-[--accent-green] font-bold mb-2">نزلت دلوقتي 🎉</p>
-                        <h2 className="text-2xl sm:text-3xl font-bold leading-relaxed">المحاضرة الثانية من الأسبوع الثالث متاحة</h2>
+                        <h2 className="text-2xl sm:text-3xl font-bold leading-relaxed">المحاضرة الثانية من الأسبوع الرابع متاحة</h2>
                         <p className="text-white/75 mt-2 font-bold">Canva والتعديل على الصور</p>
                         <p className="text-white/85 mt-3 leading-relaxed">شغّل المحاضرة داخل التطبيق، وبعدها افتح الشرح عشان تراجع الخطوات وتطبّق براحتك.</p>
                     </div>
@@ -6091,17 +6183,18 @@
             }, []);
             const handleOpenTaskWeek = useCallback((weekIndex) => { setTaskFocusId(null); setTaskFocusIndex(weekIndex); setActiveTab('tasks'); window.setTimeout(() => document.getElementById(`task-week-${weekIndex}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120); }, []);
             const handleOpenExactTask = useCallback((weekIndex, taskId) => { setTaskFocusIndex(weekIndex); setTaskFocusId(taskId); setActiveTab('tasks'); window.setTimeout(() => document.getElementById(`task-item-${encodeURIComponent(taskId)}`)?.scrollIntoView({ behavior:'smooth', block:'center' }), 260); }, []);
+            const handleOpenLectureWeek = useCallback((weekIndex) => { setLectureFocusIndex(weekIndex); setActiveTab('lectures'); window.setTimeout(() => document.getElementById(`lecture-week-${weekIndex}`)?.scrollIntoView({ behavior:'smooth', block:'start' }), 160); }, []);
             const handleFloatLecture = useCallback(({ weekTitle, lecture }) => setFloatingLecture({ weekTitle, lecture }), []);
             const closeLectureRelease = useCallback(() => {
                 sessionStorage.setItem('round5Lecture6ReleaseSeen', '1');
                 setShowLectureRelease(false);
             }, []);
             const playReleasedLecture = useCallback(() => {
-                const week = lecturesData[2];
+                const week = lecturesData[3];
                 const lecture = week?.lectures?.find(item => item.id === 'lecture-06') || week?.lectures?.[week.lectures.length - 1];
                 if (lecture) {
                     setActiveTab('lectures');
-                    setLectureFocusIndex(2);
+                    setLectureFocusIndex(3);
                     setFloatingLecture({ weekTitle: week.title, lecture });
                 }
                 closeLectureRelease();
@@ -6119,9 +6212,9 @@
                             <div className={tabPanelClass('home')} aria-hidden={activeTab !== 'home'}><HomeTab profile={profile} currentWeekIndex={currentWeekIndex} onNavigate={navigate} onEditProfile={() => setIsEditingProfile(true)} onCelebrate={celebrate} /></div>
                             <div className={tabPanelClass('lectures')} aria-hidden={activeTab !== 'lectures'}><LecturesTab setModalMessage={setModalMessage} onOpenTaskWeek={handleOpenTaskWeek} onFloatLecture={handleFloatLecture} currentWeekIndex={currentWeekIndex} focusWeekIndex={lectureFocusIndex} onCelebrate={celebrate} /></div>
                             <div className={tabPanelClass('tasks')} aria-hidden={activeTab !== 'tasks'}><TasksTab focusWeekIndex={taskFocusIndex} focusTaskId={taskFocusId} currentWeekIndex={currentWeekIndex} profile={profile} onCelebrate={celebrate} /></div>
-                            <div className={tabPanelClass('notes')} aria-hidden={activeTab !== 'notes'}><MySpace profile={profile} onCelebrate={celebrate} onEditProfile={() => setIsEditingProfile(true)} onOpenTask={handleOpenExactTask} /></div>
-                            <div className={tabPanelClass('bonus')} aria-hidden={activeTab !== 'bonus'}><BonusTab /></div>
-                            <div className={tabPanelClass('more')} aria-hidden={activeTab !== 'more'}><StudentProfilePanel profile={profile} onEditProfile={() => setIsEditingProfile(true)} /><MoreTab /></div>
+                            <div className={tabPanelClass('notes')} aria-hidden={activeTab !== 'notes'}><MySpace profile={profile} onCelebrate={celebrate} onEditProfile={() => setIsEditingProfile(true)} onOpenTask={handleOpenExactTask} onOpenLecture={handleOpenLectureWeek} /></div>
+                            <div className={tabPanelClass('bonus')} aria-hidden={activeTab !== 'bonus'}><ToolBankTab /></div>
+                            <div className={tabPanelClass('more')} aria-hidden={activeTab !== 'more'}><div className="space-y-6"><div className="content-card p-5 sm:p-6 rounded-xl shadow-md"><p className="text-xs font-bold text-[--accent-green] mb-1">إضافات تكمل رحلتك</p><h2 className="page-title text-2xl sm:text-3xl font-bold">البونص</h2><p className="text-gray-600 dark:text-gray-300 mt-2">القسم متجدد باستمرار؛ هتلاقي فيه ترشيحات ومصادر ومساعدين ومهارات ومسارات وأدوات تضيف قيمة حقيقية لشغلك ودراستك.</p></div><BonusTab /><MoreTab /><WorkflowsLaunchCard /></div></div>
                         </>}
                     </main>
                     <FloatingLecturePlayer activeLecture={floatingLecture} onClose={() => setFloatingLecture(null)} />
