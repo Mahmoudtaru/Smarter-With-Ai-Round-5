@@ -1557,7 +1557,7 @@
         const APP_MODE = "live";
         const FORCE_LEARNING_MODE = "live";
         const COURSE_WEEK_COUNT = 8;
-        const LAST_RELEASED_WEEK_INDEX = 3;
+        const LAST_RELEASED_WEEK_INDEX = 4;
         const APP_STORAGE_NAMESPACE = "round5-live";
         const OFFICIAL_COHORT_START_DATE = "2026-07-24";
         const ROUND5_WHATSAPP_COMMUNITY_URL = "https://chat.whatsapp.com/GctNSmIMdmb0gl9HtN2J5R";
@@ -1573,9 +1573,9 @@
         const APP_LECTURES_REMINDER = "كل أسبوع موجود في قائمة مستقلة. افتح الأسبوع اللي عايزه، شغّل المحاضرة، وعلّم عليها لما تخلصها.";
         const APP_LOCKED_MESSAGE = "الأسبوع ده لسه ما نزلش؛ هيتفتح أول ما محاضراته وتاسكاته تكون متاحة.";
         const APP_AVAILABILITY_TITLE = "📚 محاضرات الدفعة الخامسة";
-        const APP_AVAILABILITY_COPY = "المتاح دلوقتي أول 4 أسابيع، وباقي الأسابيع هتتفتح مع نزول محاضراتها وتاسكاتها.";
+        const APP_AVAILABILITY_COPY = "المتاح دلوقتي أول 5 أسابيع، وباقي الأسابيع هتتفتح مع نزول محاضراتها وتاسكاتها.";
         const PROFILE_KEY = 'smarterStudentProfileV1:round5-live';
-        const APP_DATA_VERSION = 15;
+        const APP_DATA_VERSION = 16;
         const getTodayIso = () => new Date().toISOString().slice(0, 10);
         const parseDateSafe = (value) => {
             const date = value ? new Date(`${value}T12:00:00`) : new Date();
@@ -2309,7 +2309,29 @@
                 summary: "الأسبوع ده هتتعلم تحوّل فكرتك لفيديو، بداية من كتابة الفكرة وتقسيمها لمشاهد، لحد تجميع الفيديو وتجهيزه للنشر.",
                 icon: "clapperboard",
                 lectures: [
-                    { id: "lecture-07", title: "المحاضرة 7: من الفكرة إلى مشاهد فيديو", summary: "هنتعلم إزاي نكتب فكرة الفيديو ونقسمها لمشاهد، ونحدد شكل كل مشهد والحركة والكاميرا." },
+                    {
+                        id: "lecture-07",
+                        title: "المحاضرة 7: إنشاء الفيديو بالذكاء الاصطناعي",
+                        summary: "هنتعلم إزاي نحوّل الفكرة لفيديو فعلي: نعمل تغذية بصرية، نحلّل المراجع، نختار طريقة التوليد المناسبة، ونجهّز Storyboard وCharacter أو Product Sheet وبرومبت واضح لكل مقطع.",
+                        sourceType: "youtube",
+                        youtubeId: "Pm-1V91KToI",
+                        sourceUrl: "https://youtu.be/Pm-1V91KToI?si=WdR7QM3bTco_iXj4",
+                        hasTask: true,
+                        attachments: [
+                            {
+                                title: "كتيب شرح محاضرة إنشاء الفيديو",
+                                url: "https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Week-5-Lecture-1/",
+                                description: "شرح مرتب لخطوات صناعة الفيديو بالذكاء الاصطناعي، من الفكرة والتغذية البصرية لحد التوليد والتجميع.",
+                                icon: "book-open-text"
+                            },
+                            {
+                                title: "بورتفوليو محمود حرب · أمثلة فيديو واستوري بورد",
+                                url: "https://mahmoudtaru.github.io/MyPortfolio/",
+                                description: "أمثلة إضافية على الفيديوهات والاستوري بورد وطريقة تحويل الفكرة لمشاهد قابلة للتنفيذ.",
+                                icon: "briefcase-business"
+                            }
+                        ]
+                    },
                     { id: "lecture-08", title: "المحاضرة 8: إنتاج الفيديو والمونتاج", summary: "هنتعلم إزاي نولّد المشاهد ونجمعها في فيديو متماسك، ونضيف المونتاج والصوت والترجمة ونجهزه للنشر." }
                 ]
             },
@@ -3397,9 +3419,17 @@
                         id: "task-lecture-07",
                         lectureId: "lecture-07",
                         required: true,
-                        text: "حوّل فكرة إلى مشاهد فيديو",
-                        brief: "اختار فكرة حقيقية، واكتبها كسيناريو قصير مقسّم لمشاهد واضحة وقابلة للتنفيذ.",
-                        ideas: ["حدد الهدف والجمهور ومدة الفيديو.", "اكتب وصف كل مشهد والحركة والكاميرا.", "جهّز أول مشهد لاختبار الاتجاه قبل إكمال الفيديو."]
+                        text: "اعمل فيديو فعلي بالذكاء الاصطناعي",
+                        brief: "نفّذ فيديو يخدم فكرة حقيقية عندك؛ ممكن يكون مقطعًا واحدًا بسيطًا، أو كذا مقطع تجمعهم في Canva أو CapCut.",
+                        ideas: [
+                            "اعمل تغذية بصرية وشوف فيديوهات من نفس النوع.",
+                            "حلّل مرجعًا بصريًا وحدد الكادرات والحركة والإيقاع.",
+                            "جرّب Text to Video أو Image to Video أو First & Last Frame حسب فكرتك.",
+                            "اعمل Storyboard لو الفيديو فيه أكتر من مشهد.",
+                            "جهّز Character Sheet أو Product Sheet لو محتاج تحافظ على الثبات.",
+                            "اكتب Prompt واضحة ومستقلة لكل مقطع، وجرّب أكتر من تعديل.",
+                            "اجمع المقاطع وراجع الانتقالات واللقطات الناقصة، وبعدها شارك الفيديو النهائي."
+                        ]
                     },
                     {
                         id: "task-lecture-08",
@@ -6060,15 +6090,15 @@
                             <Icon name="play-circle" className="w-9 h-9" />
                         </span>
                         <p className="text-[--accent-green] font-bold mb-2">نزلت دلوقتي 🎉</p>
-                        <h2 className="text-2xl sm:text-3xl font-bold leading-relaxed">المحاضرة الثانية من الأسبوع الرابع متاحة</h2>
-                        <p className="text-white/75 mt-2 font-bold">Canva والتعديل على الصور</p>
+                        <h2 className="text-2xl sm:text-3xl font-bold leading-relaxed">المحاضرة الأولى من الأسبوع الخامس متاحة</h2>
+                        <p className="text-white/75 mt-2 font-bold">إنشاء الفيديو بالذكاء الاصطناعي</p>
                         <p className="text-white/85 mt-3 leading-relaxed">شغّل المحاضرة داخل التطبيق، وبعدها افتح الشرح عشان تراجع الخطوات وتطبّق براحتك.</p>
                     </div>
                     <div className="p-5 sm:p-6 space-y-3">
                         <button type="button" onClick={onPlay} className="btn-brand-primary w-full py-3.5 px-5 rounded-xl font-bold inline-flex items-center justify-center gap-2">
                             <Icon name="play" className="w-5 h-5 fill-current" /> شغّل المحاضرة داخل التطبيق
                         </button>
-                        <a href="https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Week-3-Lecture-2/" target="_blank" rel="noopener noreferrer" className="share-card-button w-full rounded-xl py-3 px-4 font-bold inline-flex items-center justify-center gap-2">
+                        <a href="https://mahmoudtaru.github.io/Smarter-With-Ai-Round-5-Week-5-Lecture-1/" target="_blank" rel="noopener noreferrer" className="share-card-button w-full rounded-xl py-3 px-4 font-bold inline-flex items-center justify-center gap-2">
                             <Icon name="book-open-text" className="w-5 h-5" /> افتح شرح المحاضرة
                         </a>
                         <button type="button" onClick={onClose} className="w-full text-sm font-bold text-gray-500 dark:text-gray-300 py-2">هشوفها بعدين</button>
@@ -6159,7 +6189,7 @@
             const [profile, setProfile] = useState(() => safeJsonParse(localStorage.getItem(PROFILE_KEY), null));
             const [isEditingProfile, setIsEditingProfile] = useState(false);
             const [achievement, setAchievement] = useState(null);
-            const [showLectureRelease, setShowLectureRelease] = useState(() => sessionStorage.getItem('round5Lecture6ReleaseSeen') !== '1');
+            const [showLectureRelease, setShowLectureRelease] = useState(() => sessionStorage.getItem('round5Lecture7ReleaseSeen') !== '1');
             const currentWeekIndex = getCurrentWeekIndex(profile);
 
             useEffect(() => { const storedTheme = localStorage.getItem('theme'); const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; setTheme(storedTheme === 'dark' || (!storedTheme && prefersDark) ? 'dark' : 'light'); }, []);
@@ -6186,15 +6216,15 @@
             const handleOpenLectureWeek = useCallback((weekIndex) => { setLectureFocusIndex(weekIndex); setActiveTab('lectures'); window.setTimeout(() => document.getElementById(`lecture-week-${weekIndex}`)?.scrollIntoView({ behavior:'smooth', block:'start' }), 160); }, []);
             const handleFloatLecture = useCallback(({ weekTitle, lecture }) => setFloatingLecture({ weekTitle, lecture }), []);
             const closeLectureRelease = useCallback(() => {
-                sessionStorage.setItem('round5Lecture6ReleaseSeen', '1');
+                sessionStorage.setItem('round5Lecture7ReleaseSeen', '1');
                 setShowLectureRelease(false);
             }, []);
             const playReleasedLecture = useCallback(() => {
-                const week = lecturesData[3];
-                const lecture = week?.lectures?.find(item => item.id === 'lecture-06') || week?.lectures?.[week.lectures.length - 1];
+                const week = lecturesData[4];
+                const lecture = week?.lectures?.find(item => item.id === 'lecture-07') || week?.lectures?.[week.lectures.length - 1];
                 if (lecture) {
                     setActiveTab('lectures');
-                    setLectureFocusIndex(3);
+                    setLectureFocusIndex(4);
                     setFloatingLecture({ weekTitle: week.title, lecture });
                 }
                 closeLectureRelease();
